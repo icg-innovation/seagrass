@@ -1,0 +1,4 @@
+[run]
+source = seagrass/
+omit = tests/*
+command_line = -m unittest discover -s tests -b
