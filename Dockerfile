@@ -4,6 +4,12 @@
 ARG VARIANT="3.9"
 FROM mcr.microsoft.com/vscode/devcontainers/python:0-${VARIANT}
 
+# Prevents python from writing .pyc files to disk
+ENV PYTHONDONTWRITEBYTECODE 1
+
+# Prevents python from buffereing stdout and stderr
+ENV PYTHONUNBUFFERED 1
+
 # [Option] Install Node.js
 ARG INSTALL_NODE="true"
 ARG NODE_VERSION="lts/*"
