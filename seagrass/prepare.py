@@ -1,4 +1,4 @@
-import glob
+from glob import glob
 import numpy as np
 import rasterio
 from rasterio.merge import merge
@@ -31,6 +31,7 @@ def create_s2_mosaic(s2_filepath, bathymetry_filepath, bands, scale=10000):
         transform,
         bathymetry_raster.crs
     )
+
     mosaic /= scale
 
     return mosaic, transform
