@@ -10,7 +10,7 @@ Welcome to UoP Seagrass Bathymetry Project's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
+   modules
 
 Indices and tables
 ==================
