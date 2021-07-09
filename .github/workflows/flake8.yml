@@ -24,4 +24,4 @@ jobs:
     - name: Setup flake8 annotations
       uses: rbialon/flake8-annotations@v1
     - name: Run flake8
-      run: flake8 ./app --count --show-source
+      run: flake8 ./seagrass --count --show-source
