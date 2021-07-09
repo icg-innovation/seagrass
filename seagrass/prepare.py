@@ -10,14 +10,30 @@ from scipy.ndimage import gaussian_filter
 
 
 def create_s2_mosaic(s2_filepath, bathymetry_filepath, bands, scale=10000):
+    """Generates a Sentinel 2 mosaic for the areas intersecting the input
+    bathymetry raster.
+
+    Args:
+        s2_filepath (str): Directory containing the Sentinel 2 raster files.
+        bathymetry_filepath (str): Filepath to the bathymetry raster
+            file.
+        bands (list): List of integers corresponding to the desired Sentinel 2
+            bands.
+        scale (int, optional): Scale factor to obtain the true Sentinel 2
+            pixel value. Defaults to 10000.
+
+    Returns:
+        A tuple containing the output raster mosaic and the
+        affine transform matrix.
+    """
     s2_file_list = sorted(glob(s2_filepath))
     s2_raster_list = [rasterio.open(file) for file in s2_file_list]
     bathymetry_raster = rasterio.open(bathymetry_filepath)
 
-    intersecting_rasters = [
-        s2_raster_list[idx]
-        for idx in intersecting_tiles(s2_raster_list, bathymetry_raster)
-    ]
+    intersecting_rasters = intersecting_tiles(
+        s2_raster_list,
+        bathymetry_raster
+    )
 
     mosaic, transform = merge(
         intersecting_rasters,
@@ -38,56 +54,79 @@ def create_s2_mosaic(s2_filepath, bathymetry_filepath, bands, scale=10000):
 
 
 def return_s2_projected_depth(bathymetry_filepath, s2_transform, s2_shape):
+    """Returns depth raster projected onto the Sentinel 2 mosaic.
+
+    Args:
+        bathymetry_filepath (str): Filepath to the bathymetry raster
+            file.
+        s2_transform (numpy.ndarray): Transform matrix generated when creating
+            the Sentinel 2 mosaic.
+        s2_shape (tuple): Dimensions of the Sentinel 2 mosaic.
+
+    Returns:
+        numpy.ndarray: Projected depth raster data.
+    """
     bathymetry_raster = rasterio.open(bathymetry_filepath)
 
-    depth, _ = project_file(
-        bathymetry_raster,
-        bathymetry_raster.crs,
-        s2_transform,
-        s2_shape
-        )
+    bathymetry_data = bathymetry_raster.read(1)
+    bathymetry_data[bathymetry_data < -1e6] = 13
+
+    # Could be replaced with reproject match from rioxarray?
+    depth, _ = reproject(
+        bathymetry_data,
+        np.zeros((1, s2_shape[-2], s2_shape[-1]), dtype=np.float32),
+        src_transform=bathymetry_raster.transform,
+        src_crs=bathymetry_raster.crs,
+        src_nodata=13,
+        dst_transform=s2_transform,
+        dst_crs=bathymetry_raster.crs,
+        dst_resolution=10,
+        resampling=Resampling.bilinear,
+    )
 
     return depth
 
 
-def intersecting_tiles(obj_lst, raster_obj):
-    """
-    List indices in a list of rasterio objects that intersect
-    with a single raster_obj
-    """
-    ref = box(*raster_obj.bounds)
+def intersecting_tiles(raster_list, reference_raster):
+    """Returns list of raster objects that intersect with an input reference
+    raster.
 
-    bboxes = GeoSeries(
-        [box(*obj.bounds) for obj in obj_lst],
-        crs=obj_lst[0].crs,
+    Args:
+        raster_list (list): List of input raster objects.
+        reference_raster (rasterio.open object): Reference raster objects.
+
+    Returns:
+        list: List of intersecting raster objects
+    """
+    ref = box(*reference_raster.bounds)
+
+    boundary_boxes = GeoSeries(
+        [box(*raster.bounds) for raster in raster_list],
+        crs=raster_list[0].crs,
     )
 
-    return [
-        idx
-        for idx, bbox in enumerate(bboxes.to_crs(raster_obj.crs))
+    intersecting_tiles = [
+        raster_list[idx]
+        for idx, bbox in enumerate(boundary_boxes.to_crs(reference_raster.crs))
         if ref.intersects(bbox)
     ]
 
-
-def project_file(raster_file, dst_crs, dst_transform, dst_shape):
-    bd = raster_file.read(1)
-    bd[bd < -1e6] = 13
-
-    result, tfm = reproject(
-        bd,
-        np.zeros((1, dst_shape[-2], dst_shape[-1]), dtype=np.float32),
-        src_transform=raster_file.transform,
-        src_crs=raster_file.crs,
-        src_nodata=13,
-        dst_transform=dst_transform,
-        dst_crs=dst_crs,
-        dst_resolution=10,
-        resampling=Resampling.bilinear,
-    )
-    return result, tfm
+    return intersecting_tiles
 
 
 def change_crs(data, src_crs, src_transform, dst_crs):
+    """Convert CRS of input to destination.
+    THIS FUNCTION MAY BE MADE OBSOLETE IN FUTURE VERSIONS.
+
+    Args:
+        data (np.ndarray): Input raster data.
+        src_crs (CRS or dict): CRS of input raster.
+        src_transform (Affine): Transform matrix of input.
+        dst_crs (CRS or dict): Target CRS.
+
+    Returns:
+        np.ndarray: Raster reprojected to new coordinate system.
+    """
     data_bounds = array_bounds(data.shape[1], data.shape[2], src_transform)
 
     new_transform, width, height = calculate_default_transform(
@@ -99,7 +138,7 @@ def change_crs(data, src_crs, src_transform, dst_crs):
         resolution=10
     )
 
-    result, tfm = reproject(
+    reprojected, transform = reproject(
         data,
         np.zeros((4, width, height), dtype=np.float32),
         src_transform=src_transform,
@@ -111,10 +150,18 @@ def change_crs(data, src_crs, src_transform, dst_crs):
         resampling=Resampling.bilinear,
     )
 
-    return result, tfm
+    return reprojected, transform
 
 
-def raw_features(data):
+def default_features(data):
+    """Returns a array of default features for the training data.
+
+    Args:
+        data (np.ndarray): Input raster data.
+
+    Returns:
+        np.ndarray: Reshaped feature data.
+    """
     blue = data[0].ravel()
     green = data[1].ravel()
     red = data[2].ravel()
@@ -123,15 +170,25 @@ def raw_features(data):
     green2 = gaussian_filter(data[1], 2.).ravel()
     red2 = gaussian_filter(data[2], 2.).ravel()
     nir2 = gaussian_filter(data[3], 2.).ravel()
-    return np.vstack((blue, green, red, nir, blue2, green2, red2, nir2)).T
+    return np.vstack(blue, green, red, nir, blue2, green2, red2, nir2).T
 
 
-def create_training_data(s2_mosaic, depth_map):
+def create_training_data(s2_data, bathymetry_data):
+    """Turns the input s2_data and depth map into training data.
+
+    Args:
+        s2_data (np.ndarray): Input s2 raster.
+        depth_map (np.ndarray): Input bathymetry raster.
+
+    Returns:
+        tuple: Tuple of numpy ndarrays with input features and ground truth
+        values.
+    """
     # Find no_data values; mask is true where there is valid data
-    mask = depth_map != 13
+    mask = bathymetry_data != 13
     # Keep only values with depth data
-    X = raw_features(s2_mosaic)[mask.ravel()]
+    X = default_features(s2_data)[mask.ravel()]
     # Flip the depth to positive values
-    y = abs(depth_map)[mask].copy()
+    y = abs(bathymetry_data)[mask].copy()
 
     return X, y
