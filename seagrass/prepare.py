@@ -165,12 +165,24 @@ def default_features(data):
     blue = data[0].ravel()
     green = data[1].ravel()
     red = data[2].ravel()
-    nir = data[3].ravel()  # Actually nearest red-edge band
-    blue2 = gaussian_filter(data[0], 2.).ravel()
-    green2 = gaussian_filter(data[1], 2.).ravel()
-    red2 = gaussian_filter(data[2], 2.).ravel()
-    nir2 = gaussian_filter(data[3], 2.).ravel()
-    return np.vstack((blue, green, red, nir, blue2, green2, red2, nir2)).T
+    red_edge_1 = data[3].ravel()
+    blue_blurred = gaussian_filter(data[0], 2.).ravel()
+    green_blurred = gaussian_filter(data[1], 2.).ravel()
+    red_blurred = gaussian_filter(data[2], 2.).ravel()
+    red_edge_1_blurred = gaussian_filter(data[3], 2.).ravel()
+
+    return np.vstack(
+        (
+            blue,
+            green,
+            red,
+            red_edge_1,
+            blue_blurred,
+            green_blurred,
+            red_blurred,
+            red_edge_1_blurred
+        )
+    ).T
 
 
 def create_training_data(s2_data, bathymetry_data):
