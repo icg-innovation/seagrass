@@ -170,7 +170,7 @@ def default_features(data):
     green2 = gaussian_filter(data[1], 2.).ravel()
     red2 = gaussian_filter(data[2], 2.).ravel()
     nir2 = gaussian_filter(data[3], 2.).ravel()
-    return np.vstack(blue, green, red, nir, blue2, green2, red2, nir2).T
+    return np.vstack((blue, green, red, nir, blue2, green2, red2, nir2)).T
 
 
 def create_training_data(s2_data, bathymetry_data):
