@@ -132,3 +132,6 @@ dmypy.json
 # VS Code
 .devcontainer/
 .vscode/
+
+# Raster
+*.tif
