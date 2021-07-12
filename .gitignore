@@ -133,5 +133,5 @@ dmypy.json
 .devcontainer/
 .vscode/
 
-# Raster
-*.tif
+# Local Data
+data/*
