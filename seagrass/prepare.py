@@ -162,25 +162,37 @@ def default_features(data):
     Returns:
         np.ndarray: Reshaped feature data.
     """
-    blue = data[0].ravel()
-    green = data[1].ravel()
-    red = data[2].ravel()
-    red_edge_1 = data[3].ravel()
-    blue_blurred = gaussian_filter(data[0], 2.).ravel()
-    green_blurred = gaussian_filter(data[1], 2.).ravel()
-    red_blurred = gaussian_filter(data[2], 2.).ravel()
-    red_edge_1_blurred = gaussian_filter(data[3], 2.).ravel()
+    blue_deglint = data[0].ravel()
+    green_deglint = data[1].ravel()
+    red_deglint = data[2].ravel()
+    red_edge_1 = data[6].ravel()
+    red_edge_2 = data[7].ravel()
+    red_edge_3 = data[8].ravel()
+    nir = data[9].ravel()
+    blue_deglint_blurred = gaussian_filter(data[0], 2.).ravel()
+    green_deglint_blurred = gaussian_filter(data[1], 2.).ravel()
+    red_deglint_blurred = gaussian_filter(data[2], 2.).ravel()
+    red_edge_1_blurred = gaussian_filter(data[6], 2.).ravel()
+    red_edge_2_blurred = gaussian_filter(data[7], 2.).ravel()
+    red_edge_3_blurred = gaussian_filter(data[8], 2.).ravel()
+    nir_blurred = gaussian_filter(data[9], 2.).ravel()
 
     return np.vstack(
         (
-            blue,
-            green,
-            red,
+            blue_deglint,
+            green_deglint,
+            red_deglint,
             red_edge_1,
-            blue_blurred,
-            green_blurred,
-            red_blurred,
-            red_edge_1_blurred
+            red_edge_2,
+            red_edge_3,
+            nir,
+            blue_deglint_blurred,
+            green_deglint_blurred,
+            red_deglint_blurred,
+            red_edge_1_blurred,
+            red_edge_2_blurred,
+            red_edge_3_blurred,
+            nir_blurred,
         )
     ).T
 
