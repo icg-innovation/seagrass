@@ -9,7 +9,12 @@ from shapely.geometry import box
 from scipy.ndimage import gaussian_filter
 
 
-def create_s2_mosaic(s2_filepath, bathymetry_filepath, bands, scale=10000):
+def create_s2_mosaic(
+    s2_filepath,
+    bathymetry_filepath,
+    bands=None,
+    scale=10000
+):
     """Generates a Sentinel 2 mosaic for the areas intersecting the input
     bathymetry raster.
 
@@ -157,13 +162,15 @@ def change_crs(data, src_crs, src_transform, dst_crs):
     return reprojected, transform
 
 
-def return_features(data, bands=[0, 1, 2, 6, 7, 8, 9]):
+def return_features(data, bands):
     """Returns a array of default features for the training data.
 
     Args:
         data (np.ndarray): Input raster data.
         bands (list): List of indices corresponding to the desired raster
-        bands.
+        bands. WARNING: If using the bands attr when creating an Sentinel 2
+        mosaic, these indices may differ as order is reset when creating a
+        mosaic, e.g. [1,2,4,6] --> [0,1,2,3].
 
     Returns:
         np.ndarray: Reshaped feature data.
@@ -182,7 +189,7 @@ def return_features(data, bands=[0, 1, 2, 6, 7, 8, 9]):
 def create_training_data(
     s2_data,
     bathymetry_data,
-    bands=[0, 1, 2, 6, 7, 8, 9],
+    bands,
 ):
     """Turns the input s2_data and depth map into training data.
 
@@ -190,7 +197,9 @@ def create_training_data(
         s2_data (np.ndarray): Input s2 raster.
         bathymetry_data (np.ndarray): Input bathymetry raster.
         bands (list): List of indices corresponding to the desired raster
-        bands.
+        bands. WARNING: If using the bands attr when creating an Sentinel 2
+        mosaic, these indices may differ as order is reset when creating a
+        mosaic, e.g. [1,2,4,6] --> [0,1,2,3].
 
     Returns:
         tuple: Tuple of numpy ndarrays with input features and ground truth
