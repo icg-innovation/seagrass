@@ -183,12 +183,9 @@ def return_features(data, bands=None):
     bands_1D = [data[band].ravel() for band in bands]
     blurred_1D = [gaussian_filter(data[band], 2.).ravel() for band in bands]
 
-    return np.vstack(
-        tuple(
-            *bands_1D,
-            *blurred_1D,
-        )
-    ).T
+    all_bands = bands_1D + blurred_1D
+
+    return np.vstack(all_bands).T
 
 
 def create_training_data(
