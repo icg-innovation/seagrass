@@ -12,7 +12,7 @@ from scipy.ndimage import gaussian_filter
 def create_s2_mosaic(
     s2_filepath,
     bathymetry_filepath,
-    bands=None,
+    bands,
     scale=10000
 ):
     """Generates a Sentinel 2 mosaic for the areas intersecting the input
@@ -23,6 +23,7 @@ def create_s2_mosaic(
         bathymetry_filepath (str): Filepath to the bathymetry raster
             file.
         bands (list): List of integers corresponding to the desired Sentinel 2
+            bands. WARNING: There is an issue when specifying more than four
             bands.
         scale (int, optional): Scale factor to obtain the true Sentinel 2
             pixel value. Defaults to 10000.
@@ -162,19 +163,23 @@ def change_crs(data, src_crs, src_transform, dst_crs):
     return reprojected, transform
 
 
-def return_features(data, bands):
+def return_features(data, bands=None):
     """Returns a array of default features for the training data.
 
     Args:
         data (np.ndarray): Input raster data.
-        bands (list): List of indices corresponding to the desired raster
-        bands. WARNING: If using the bands attr when creating an Sentinel 2
-        mosaic, these indices may differ as order is reset when creating a
-        mosaic, e.g. [1,2,4,6] --> [0,1,2,3].
+        bands (list, optional): List of indices corresponding to the desired
+        raster bands. WARNING: If using the bands attr when creating a
+        Sentinel 2 mosaic, these indices may differ as order is reset when
+        creating a mosaic, e.g. [1,2,4,6] --> [0,1,2,3].
 
     Returns:
         np.ndarray: Reshaped feature data.
     """
+
+    if bands is None:
+        bands = list(np.arange(len(data)))
+
     bands_1D = [data[band].ravel() for band in bands]
     blurred_1D = [gaussian_filter(data[band], 2.).ravel() for band in bands]
 
@@ -189,26 +194,30 @@ def return_features(data, bands):
 def create_training_data(
     s2_data,
     bathymetry_data,
-    bands,
+    s2_bands=None,
 ):
     """Turns the input s2_data and depth map into training data.
 
     Args:
         s2_data (np.ndarray): Input s2 raster.
         bathymetry_data (np.ndarray): Input bathymetry raster.
-        bands (list): List of indices corresponding to the desired raster
-        bands. WARNING: If using the bands attr when creating an Sentinel 2
-        mosaic, these indices may differ as order is reset when creating a
-        mosaic, e.g. [1,2,4,6] --> [0,1,2,3].
+        s2_bands (list, optional): List of indices corresponding to the desired
+        raster bands. WARNING: If using the bands attr when creating a
+        Sentinel 2 mosaic, these indices may differ as order is reset when
+        creating a mosaic, e.g. [1,2,4,6] --> [0,1,2,3].
 
     Returns:
         tuple: Tuple of numpy ndarrays with input features and ground truth
         values.
     """
+
+    if s2_bands is None:
+        s2_bands = list(np.arange(len(s2_data)))
+
     # Find no_data values; mask is true where there is valid data
     mask = bathymetry_data != 13
     # Keep only values with depth data
-    X = return_features(s2_data, bands)[mask.ravel()]
+    X = return_features(s2_data, s2_bands)[mask.ravel()]
     # Flip the depth to positive values
     y = abs(bathymetry_data)[mask].copy()
 
