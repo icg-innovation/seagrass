@@ -53,7 +53,11 @@ def create_s2_mosaic(s2_filepath, bathymetry_filepath, bands, scale=10000):
     return mosaic, transform
 
 
-def return_s2_projected_depth(bathymetry_filepath, s2_transform, s2_shape):
+def return_s2_projected_depth(
+    bathymetry_filepath,
+    s2_transform,
+    s2_shape,
+):
     """Returns depth raster projected onto the Sentinel 2 mosaic.
 
     Args:
@@ -71,7 +75,7 @@ def return_s2_projected_depth(bathymetry_filepath, s2_transform, s2_shape):
     bathymetry_data = bathymetry_raster.read(1)
     bathymetry_data[bathymetry_data < -1e6] = 13
 
-    # Could be replaced with reproject match from rioxarray?
+    # Resamples to Sentinel 2 image resolution?
     depth, _ = reproject(
         bathymetry_data,
         np.zeros((1, s2_shape[-2], s2_shape[-1]), dtype=np.float32),
@@ -153,56 +157,40 @@ def change_crs(data, src_crs, src_transform, dst_crs):
     return reprojected, transform
 
 
-def default_features(data):
+def return_features(data, bands=[0, 1, 2, 6, 7, 8, 9]):
     """Returns a array of default features for the training data.
 
     Args:
         data (np.ndarray): Input raster data.
+        bands (list): List of indices corresponding to the desired raster
+        bands.
 
     Returns:
         np.ndarray: Reshaped feature data.
     """
-    blue_deglint = data[0].ravel()
-    green_deglint = data[1].ravel()
-    red_deglint = data[2].ravel()
-    red_edge_1 = data[6].ravel()
-    red_edge_2 = data[7].ravel()
-    red_edge_3 = data[8].ravel()
-    nir = data[9].ravel()
-    blue_deglint_blurred = gaussian_filter(data[0], 2.).ravel()
-    green_deglint_blurred = gaussian_filter(data[1], 2.).ravel()
-    red_deglint_blurred = gaussian_filter(data[2], 2.).ravel()
-    red_edge_1_blurred = gaussian_filter(data[6], 2.).ravel()
-    red_edge_2_blurred = gaussian_filter(data[7], 2.).ravel()
-    red_edge_3_blurred = gaussian_filter(data[8], 2.).ravel()
-    nir_blurred = gaussian_filter(data[9], 2.).ravel()
+    bands_1D = [data[band].ravel() for band in bands]
+    blurred_1D = [gaussian_filter(data[band], 2.).ravel() for band in bands]
 
     return np.vstack(
-        (
-            blue_deglint,
-            green_deglint,
-            red_deglint,
-            red_edge_1,
-            red_edge_2,
-            red_edge_3,
-            nir,
-            blue_deglint_blurred,
-            green_deglint_blurred,
-            red_deglint_blurred,
-            red_edge_1_blurred,
-            red_edge_2_blurred,
-            red_edge_3_blurred,
-            nir_blurred,
+        tuple(
+            *bands_1D,
+            *blurred_1D,
         )
     ).T
 
 
-def create_training_data(s2_data, bathymetry_data):
+def create_training_data(
+    s2_data,
+    bathymetry_data,
+    bands=[0, 1, 2, 6, 7, 8, 9],
+):
     """Turns the input s2_data and depth map into training data.
 
     Args:
         s2_data (np.ndarray): Input s2 raster.
-        depth_map (np.ndarray): Input bathymetry raster.
+        bathymetry_data (np.ndarray): Input bathymetry raster.
+        bands (list): List of indices corresponding to the desired raster
+        bands.
 
     Returns:
         tuple: Tuple of numpy ndarrays with input features and ground truth
@@ -211,7 +199,7 @@ def create_training_data(s2_data, bathymetry_data):
     # Find no_data values; mask is true where there is valid data
     mask = bathymetry_data != 13
     # Keep only values with depth data
-    X = default_features(s2_data)[mask.ravel()]
+    X = return_features(s2_data, bands)[mask.ravel()]
     # Flip the depth to positive values
     y = abs(bathymetry_data)[mask].copy()
 
