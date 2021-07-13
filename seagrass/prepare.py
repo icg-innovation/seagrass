@@ -41,20 +41,56 @@ def create_s2_mosaic(
         bathymetry_raster
     )
 
-    mosaic, transform = merge(
+    mosaic, transform = merge_tiles(
         intersecting_rasters,
-        indexes=bands,
-        dtype=np.float32
+        bands,
+        s2_raster_list[0].crs,
+        bathymetry_raster.crs,
     )
 
-    mosaic, transform = change_crs(
-        mosaic,
-        s2_raster_list[0].crs,
-        transform,
-        bathymetry_raster.crs
-    )
+    print(mosaic.shape)
 
     mosaic /= scale
+
+    return mosaic, transform
+
+
+def merge_tiles(
+    rasters,
+    bands,
+    s2_crs,
+    bathymetry_crs
+):
+    # Temporary workaround if specifying more than 4 bands. TAKES A LONG TIME.
+    if len(bands) > 4:
+        # How many elements each list should have.
+        n = 4
+        # Splitting the bands list into chunks of length 4.
+        bands_list = [bands[i:i + n] for i in range(0, len(bands), n)]
+        mosaic_list = []
+        for bands in bands_list:
+            mosaic_chunk, transform = merge(
+                rasters,
+                indexes=bands,
+                dtype=np.float32
+            )
+
+            mosaic_chunk, transform = change_crs(
+                mosaic_chunk,
+                s2_crs,
+                transform,
+                bathymetry_crs
+            )
+
+        mosaic_list.append(mosaic_chunk)
+        mosaic = np.vstack(mosaic_list)
+
+    else:
+        mosaic, transform = merge(
+                rasters,
+                indexes=bands,
+                dtype=np.float32
+            )
 
     return mosaic, transform
 
