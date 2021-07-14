@@ -8,9 +8,9 @@ def return_features(data, bands=None):
     Args:
         data (np.ndarray): Input raster data.
         bands (list, optional): List of indices corresponding to the desired
-        raster bands. WARNING: If using the bands attr when creating a
-        Sentinel 2 mosaic, these indices may differ as order is reset when
-        creating a mosaic, e.g. [1,2,4,6] --> [0,1,2,3].
+            raster bands. WARNING: If using the bands attr when creating a
+            Sentinel 2 mosaic, these indices may differ as order is reset when
+            creating a mosaic, e.g. [1,2,4,6] --> [0,1,2,3].
 
     Returns:
         np.ndarray: Reshaped feature data.
@@ -38,10 +38,12 @@ def create_training_data(
     Args:
         s2_data (np.ndarray): Input s2 raster.
         bathymetry_data (np.ndarray): Input bathymetry raster.
+        no_data_value (int): Integer value representing pixels containing no
+            data.
         s2_bands (list, optional): List of indices corresponding to the desired
-        raster bands. WARNING: If using the bands attr when creating a
-        Sentinel 2 mosaic, these indices may differ as order is reset when
-        creating a mosaic, e.g. [1,2,4,6] --> [0,1,2,3].
+            raster bands. WARNING: If using the bands attr when creating a
+            Sentinel 2 mosaic, these indices may differ as order is reset when
+            creating a mosaic, e.g. [1,2,4,6] --> [0,1,2,3].
 
     Returns:
         tuple: Tuple of numpy ndarrays with input features and ground truth
