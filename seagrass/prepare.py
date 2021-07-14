@@ -58,6 +58,6 @@ def create_training_data(
     # Keep only values with depth data
     X = return_features(s2_data, s2_bands)[mask.ravel()]
     # Flip the depth to positive values
-    y = abs(bathymetry_data)[mask].copy()
+    y = abs(bathymetry_data)[mask].copy().reshape(-1, 1)
 
     return X, y
