@@ -63,8 +63,6 @@ def return_s2_mosaic_projected_depth(
     s2_transform,
     s2_shape,
     no_data_value=None,
-    no_data_threshold=None,
-    no_data_replace=None,
 ):
     """Returns depth raster projected onto the Sentinel 2 mosaic.
 
@@ -74,21 +72,18 @@ def return_s2_mosaic_projected_depth(
         s2_transform (numpy.ndarray): Transform matrix generated when creating
             the Sentinel 2 mosaic.
         s2_shape (tuple): Dimensions of the Sentinel 2 mosaic.
+        no_data_value (int): Integer value representing pixels containing no
+            data.
 
     Returns:
         numpy.ndarray: Projected depth raster data.
     """
-    bathymetry_raster = rasterio.open(bathymetry_filepath)
-
-    bathymetry_data = bathymetry_raster.read(1)
-
-    if no_data_threshold:
-        bathymetry_data[bathymetry_data < no_data_threshold] = no_data_replace
-        no_data_value = no_data_replace
+    bathymetry_data = rasterio.open(bathymetry_filepath)
+    bathymetry_raster = bathymetry_data.read(1)
 
     # Resamples to Sentinel 2 image resolution?
     depth, _ = reproject(
-        bathymetry_data,
+        bathymetry_raster,
         np.zeros((1, s2_shape[-2], s2_shape[-1]), dtype=np.float32),
         src_transform=bathymetry_raster.transform,
         src_crs=bathymetry_raster.crs,
