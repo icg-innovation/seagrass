@@ -94,11 +94,11 @@ def return_s2_mosaic_projected_depth(
     depth, _ = reproject(
         bathymetry_raster,
         np.zeros((1, s2_shape[-2], s2_shape[-1]), dtype=np.float32),
-        src_transform=bathymetry_raster.transform,
-        src_crs=bathymetry_raster.crs,
+        src_transform=bathymetry_data.transform,
+        src_crs=bathymetry_data.crs,
         src_nodata=no_data_value,
         dst_transform=s2_transform,
-        dst_crs=bathymetry_raster.crs,
+        dst_crs=bathymetry_data.crs,
         dst_resolution=10,
         resampling=Resampling.bilinear,
     )
