@@ -70,7 +70,8 @@ def save_training_data_csv(filepath, X, y, **kwargs):
 
 
 def save_training_data_modulos(filepath, X, y, **kwargs):
-    """Save training data in format to be passed to modulos.
+    """Save training data in format to be passed to modulos. WARNING: THIS
+    METHOD IS CURRENTLY A PLACEHOLDER AND IS YET TO BE WRITTEN.
 
     Args:
         filepath (str): Filepath to save training data.
