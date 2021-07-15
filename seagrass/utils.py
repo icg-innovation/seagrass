@@ -2,16 +2,19 @@ import numpy as np
 import pandas as pd
 
 
-def save_training_data(filepath, X, y, type, **kwargs):
+def save_training_data(filepath, X, y, type=None, **kwargs):
     """Save training data in desired format.
 
     Args:
         filepath (str): Filepath to save training data.
         X (numpy.ndarray): Training data features.
         y (numpy.ndarray): Machine learning target values.
-        type (str): Desired file type. Accepted options are
+        type (str, optional): Desired file type. Accepted options are
             currently `npy` and `csv`.
     """
+
+    if type is None:
+        type = filepath.split('.')[-1]
 
     if type == "npy":
         save_training_data_npy(filepath, X, y)
@@ -22,7 +25,7 @@ def save_training_data(filepath, X, y, type, **kwargs):
     elif type == "modulos":
         save_training_data_modulos(filepath, X, y, **kwargs)
     else:
-        raise ValueError("No file type specified!")
+        raise ValueError("Invalid filetype!")
 
 
 def save_training_data_npy(filepath, X, y):
@@ -78,23 +81,27 @@ def save_training_data_modulos(filepath, X, y, **kwargs):
     pass
 
 
-def extract_training_data(filepath, type):
+def extract_training_data(filepath, type=None):
     """Extract training data from file.
 
     Args:
         filepath (str): Filepath to the training data.
-        type (str): Filetype of the training data.
+        type (str, optional): Filetype of the training data.
 
     Returns:
         tuple: Tuple containing training data features and target values for
         machine learning.
     """
+
+    if type is None:
+        type = filepath.split('.')[-1]
+
     if type == "npy":
         extract_training_data_npy(filepath)
     elif type == "csv":
         extract_training_data_csv(filepath)
     else:
-        raise ValueError("No filetype specified!")
+        raise ValueError("Invalid filetype!")
 
 
 def extract_training_data_npy(filepath):
