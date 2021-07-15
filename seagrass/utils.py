@@ -42,10 +42,10 @@ def save_training_data_csv(filepath, X, y, **kwargs):
         X (numpy.ndarray): Training data features.
         y (numpy.ndarray): Machine learning target values.
     """
-    cols = kwargs.get('columns')
+    cols = kwargs.get('column_labels')
 
     df = pd.DataFrame(np.hstack([X, y]), columns=cols)
-    df.to_csv(filepath)
+    df.to_csv(filepath, **kwargs)
 
 
 def save_training_data_modulos(filepath, X, y, **kwargs):
