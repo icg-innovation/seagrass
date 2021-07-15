@@ -10,13 +10,13 @@ def save_training_data(filepath, X, y, type, **kwargs):
         X (numpy.ndarray): Training data features.
         y (numpy.ndarray): Machine learning target values.
     """
-    if type == 'npy':
+    if type == "npy":
         save_training_data_npy(filepath, X, y)
 
-    if type == 'csv':
+    if type == "csv":
         save_training_data_csv(filepath, X, y, **kwargs)
 
-    if type == 'modulos':
+    if type == "modulos":
         save_training_data_modulos(filepath, X, y, **kwargs)
 
 
@@ -28,10 +28,7 @@ def save_training_data_npy(filepath, X, y):
         X (numpy.ndarray): Training data features.
         y (numpy.ndarray): Machine learning target values.
     """
-    np.save(
-        filepath,
-        np.hstack([X, y])
-    )
+    np.save(filepath, np.hstack([X, y]))
 
 
 def save_training_data_csv(filepath, X, y, **kwargs):
@@ -42,7 +39,7 @@ def save_training_data_csv(filepath, X, y, **kwargs):
         X (numpy.ndarray): Training data features.
         y (numpy.ndarray): Machine learning target values.
     """
-    cols = kwargs.pop('column_labels', None)
+    cols = kwargs.pop("column_labels", None)
 
     df = pd.DataFrame(np.hstack([X, y]), columns=cols)
     df.to_csv(filepath, **kwargs)
@@ -56,6 +53,7 @@ def save_training_data_modulos(filepath, X, y, **kwargs):
         X (numpy.ndarray): Training data features.
         y (numpy.ndarray): Machine learning target values.
     """
+    print("This function hasn't been written yet!")
     pass
 
 
