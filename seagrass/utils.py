@@ -97,11 +97,13 @@ def extract_training_data(filepath, type=None):
         type = filepath.split('.')[-1]
 
     if type == "npy":
-        extract_training_data_npy(filepath)
+        X, y = extract_training_data_npy(filepath)
     elif type == "csv":
-        extract_training_data_csv(filepath)
+        X, y = extract_training_data_csv(filepath)
     else:
         raise ValueError("Invalid filetype!")
+
+    return X, y
 
 
 def extract_training_data_npy(filepath):
