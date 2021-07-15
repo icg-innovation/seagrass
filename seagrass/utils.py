@@ -9,7 +9,10 @@ def save_training_data(filepath, X, y, type, **kwargs):
         filepath (str): Filepath to save training data.
         X (numpy.ndarray): Training data features.
         y (numpy.ndarray): Machine learning target values.
+        type (str): Desired file type. Accepted options are
+            currently `npy` and `csv`.
     """
+
     if type == "npy":
         save_training_data_npy(filepath, X, y)
 
@@ -28,6 +31,14 @@ def save_training_data_npy(filepath, X, y):
         X (numpy.ndarray): Training data features.
         y (numpy.ndarray): Machine learning target values.
     """
+
+    filepath_extension = filepath.split('.')[-1]
+    if filepath_extension != 'npy':
+        raise ValueError(
+            f"Extension .{filepath_extension} is not valid for "
+            "the specified filetype! Check the input filepath."
+        )
+
     np.save(filepath, np.hstack([X, y]))
 
 
@@ -39,6 +50,14 @@ def save_training_data_csv(filepath, X, y, **kwargs):
         X (numpy.ndarray): Training data features.
         y (numpy.ndarray): Machine learning target values.
     """
+
+    filepath_extension = filepath.split('.')[-1]
+    if filepath_extension != 'csv':
+        raise ValueError(
+            f"Extension .{filepath_extension} is not valid for "
+            "the specified filetype! Check the input filepath."
+        )
+
     cols = kwargs.pop("column_labels", None)
 
     df = pd.DataFrame(np.hstack([X, y]), columns=cols)
@@ -65,7 +84,7 @@ def extract_training_data(filepath):
 
     Returns:
         tuple: Tuple containing training data features and target values for
-            machine learning.
+        machine learning.
     """
     data = np.load(filepath)
     X = data[:, :-1]
