@@ -25,7 +25,7 @@ def save_training_data(filepath, X, y, type=None, **kwargs):
     elif type == "modulos":
         save_training_data_modulos(filepath, X, y, **kwargs)
     else:
-        raise ValueError("Invalid filetype!")
+        raise ValueError("Invalid filetype! Check your filepath.")
 
 
 def save_training_data_npy(filepath, X, y):
@@ -101,7 +101,7 @@ def extract_training_data(filepath, type=None):
     elif type == "csv":
         X, y = extract_training_data_csv(filepath)
     else:
-        raise ValueError("Invalid filetype!")
+        raise ValueError("Invalid filetype! Check your filepath.")
 
     return X, y
 
