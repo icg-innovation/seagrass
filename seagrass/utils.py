@@ -16,11 +16,13 @@ def save_training_data(filepath, X, y, type, **kwargs):
     if type == "npy":
         save_training_data_npy(filepath, X, y)
 
-    if type == "csv":
+    elif type == "csv":
         save_training_data_csv(filepath, X, y, **kwargs)
 
-    if type == "modulos":
+    elif type == "modulos":
         save_training_data_modulos(filepath, X, y, **kwargs)
+    else:
+        raise ValueError("No file type specified!")
 
 
 def save_training_data_npy(filepath, X, y):
@@ -32,8 +34,8 @@ def save_training_data_npy(filepath, X, y):
         y (numpy.ndarray): Machine learning target values.
     """
 
-    filepath_extension = filepath.split('.')[-1]
-    if filepath_extension != 'npy':
+    filepath_extension = filepath.split(".")[-1]
+    if filepath_extension != "npy":
         raise ValueError(
             f"Extension .{filepath_extension} is not valid for "
             "the specified filetype! Check the input filepath."
@@ -51,8 +53,8 @@ def save_training_data_csv(filepath, X, y, **kwargs):
         y (numpy.ndarray): Machine learning target values.
     """
 
-    filepath_extension = filepath.split('.')[-1]
-    if filepath_extension != 'csv':
+    filepath_extension = filepath.split(".")[-1]
+    if filepath_extension != "csv":
         raise ValueError(
             f"Extension .{filepath_extension} is not valid for "
             "the specified filetype! Check the input filepath."
@@ -76,8 +78,27 @@ def save_training_data_modulos(filepath, X, y, **kwargs):
     pass
 
 
-def extract_training_data(filepath):
-    """Extract training data from .npy file.
+def extract_training_data(filepath, type):
+    """Extract training data from file.
+
+    Args:
+        filepath (str): Filepath to the training data.
+        type (str): Filetype of the training data.
+
+    Returns:
+        tuple: Tuple containing training data features and target values for
+        machine learning.
+    """
+    if type == "npy":
+        extract_training_data_npy(filepath)
+    elif type == "csv":
+        extract_training_data_csv(filepath)
+    else:
+        raise ValueError("No filetype specified!")
+
+
+def extract_training_data_npy(filepath):
+    """Extract training data from npy file.
 
     Args:
         filepath (str): Filepath to training data in .npy format.
@@ -89,5 +110,23 @@ def extract_training_data(filepath):
     data = np.load(filepath)
     X = data[:, :-1]
     y = data[:, -1].reshape(-1, 1)
+
+    return X, y
+
+
+def extract_training_data_csv(filepath):
+    """Extract training data from csv file.
+
+    Args:
+        filepath (str): Filepath to training data in .csv format.
+
+    Returns:
+        tuple: Tuple containing training data features and target values for
+        machine learning.
+    """
+
+    data = pd.read_csv(filepath)
+    X = data.iloc[:, :-1].values
+    y = data.iloc[:, -1].values.reshape(-1, 1)
 
     return X, y
