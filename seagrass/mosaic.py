@@ -17,7 +17,8 @@ def create_s2_mosaic(
     bathymetry raster.
 
     Args:
-        s2_filepath (str): Directory containing the Sentinel 2 raster files.
+        s2_filepath (str): List of filepaths of Sentinel 2 rasters to be
+            merged.
         bathymetry_filepath (str): Filepath to the bathymetry raster
             file.
         bands (list): List of integers corresponding to the desired Sentinel 2
