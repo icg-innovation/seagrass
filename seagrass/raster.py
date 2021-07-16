@@ -124,4 +124,4 @@ def open_and_match_rasters(
     bathymetry = rioxarray.open_rasterio(bathymetry_filepath)
     bathymetry = bathymetry.rio.reproject_match(sentinel2)
 
-    return sentinel2.values, bathymetry.values
+    return sentinel2, bathymetry
