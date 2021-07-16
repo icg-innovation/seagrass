@@ -18,50 +18,75 @@ def open_from_json(json_filepath):
     with open(json_filepath) as f:
         data_dict = json.load(f)
 
-    sentinel_2_filepath = data_dict["s2_filepath"]
+    sentinel2_filepath = data_dict["sentinel2_filepath"]
     bathymetry_filepath = data_dict["bathymetry_filepath"]
 
-    s2_bands = data_dict.get("s2_bands")
-    s2_scale = data_dict.get("s2_scale", 10000)
+    sentinel2_bands = data_dict.get("sentinel2_bands")
+    sentinel2_scale = data_dict.get("sentinel2_scale", 10000)
     bathymetry_nodata = data_dict.get("bathymetry_nodata")
     bathymetry_nodata_threshold = data_dict.get("bathymetry_nodata_threshold")
 
-    if type(sentinel_2_filepath) is list and len(sentinel_2_filepath) == 1:
-        sentinel_2_filepath = sentinel_2_filepath[0]
+    if type(sentinel2_filepath) is list and len(sentinel2_filepath) == 1:
+        sentinel2_filepath = sentinel2_filepath[0]
 
-    if type(sentinel_2_filepath) is list:
-        s2_mosaic, s2_transform = create_s2_mosaic(
-            sentinel_2_filepath,
+    if type(sentinel2_filepath) is list:
+        sentinel2_mosaic, bathymetry = return_s2_mosaic_projected_depth(
+            sentinel2_filepath,
             bathymetry_filepath,
-            s2_bands,
-            s2_scale
-        )
-
-        bathymetry, _ = return_s2_mosaic_projected_depth(
-            bathymetry_filepath,
-            s2_transform,
-            s2_mosaic.shape,
+            sentinel2_bands,
+            sentinel2_scale,
             bathymetry_nodata,
             bathymetry_nodata_threshold
         )
 
-        return s2_mosaic, bathymetry
+        return sentinel2_mosaic, bathymetry
 
     else:
-        s2_image, bathymetry = open_and_match_rasters(
-            sentinel_2_filepath,
-            bathymetry_filepath
+        sentinel2_image, bathymetry = open_and_match_rasters(
+            sentinel2_filepath,
+            bathymetry_filepath,
+            sentinel2_scale
         )
 
-        return s2_image, bathymetry
+        return sentinel2_image, bathymetry
 
 
-def open_and_match_rasters(sentinel_2_filepath, bathymetry_filepath):
+def open_sentinel2_mosaic_and_matched_depth(
+    sentinel2_filepath,
+    bathymetry_filepath,
+    sentinel2_bands=None,
+    sentinel2_scale=None,
+    bathymetry_nodata=None,
+    bathymetry_nodata_threshold=None
+):
+    sentinel2_mosaic, sentinel2_transform = create_s2_mosaic(
+        sentinel2_filepath,
+        bathymetry_filepath,
+        sentinel2_bands,
+        sentinel2_scale
+    )
+
+    bathymetry, _ = return_s2_mosaic_projected_depth(
+        bathymetry_filepath,
+        sentinel2_transform,
+        sentinel2_mosaic.shape,
+        bathymetry_nodata,
+        bathymetry_nodata_threshold
+    )
+
+    return sentinel2_mosaic, bathymetry
+
+
+def open_and_match_rasters(
+    sentinel2_filepath,
+    bathymetry_filepath,
+    sentinel2_scale=10000
+):
     """Opens and returns Sentinel 2 and bathymetry rasters with matched
     projections, crs, resolution, etc.
 
     Args:
-        sentinel_2_filepath (str): Filepath to the Sentinel 2 raster
+        sentinel2_filepath (str): Filepath to the Sentinel 2 raster
             file.
         bathymetry_filepath (str): Filepath to the bathymetry raster
             file.
@@ -70,9 +95,9 @@ def open_and_match_rasters(sentinel_2_filepath, bathymetry_filepath):
         tuple: Tuple of numpy.ndarrays containing a Sentinel 2 raster
         and a bathymetry raster.
     """
-    sentinel_2 = rioxarray.open_rasterio(sentinel_2_filepath)
+    sentinel2 = rioxarray.open_rasterio(sentinel2_filepath)
 
     bathymetry = rioxarray.open_rasterio(bathymetry_filepath)
-    bathymetry = bathymetry.rio.reproject_match(sentinel_2)
+    bathymetry = bathymetry.rio.reproject_match(sentinel2)
 
-    return sentinel_2.values, bathymetry.values
+    return sentinel2.values/sentinel2_scale, bathymetry.values
