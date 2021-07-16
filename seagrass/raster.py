@@ -115,7 +115,7 @@ def open_and_match_rasters(
             file.
 
     Returns:
-        tuple: Tuple of numpy.ndarrays containing a Sentinel 2 raster
+        tuple: Tuple of xarray.DataArrays containing a Sentinel 2 raster
         and a bathymetry raster.
     """
     sentinel2 = rioxarray.open_rasterio(sentinel2_filepath)
