@@ -1,4 +1,3 @@
-from glob import glob
 import numpy as np
 import rasterio
 from rasterio.merge import merge
@@ -9,7 +8,7 @@ from shapely.geometry import box
 
 
 def create_s2_mosaic(
-    s2_filepath,
+    s2_file_list,
     bathymetry_filepath,
     bands,
     scale=10000
@@ -31,7 +30,6 @@ def create_s2_mosaic(
         A tuple containing the output raster mosaic and the
         affine transform matrix.
     """
-    s2_file_list = sorted(glob(s2_filepath))
     s2_raster_list = [rasterio.open(file) for file in s2_file_list]
     bathymetry_raster = rasterio.open(bathymetry_filepath)
 
