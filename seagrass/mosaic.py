@@ -61,7 +61,7 @@ def return_s2_mosaic_projected_depth(
     bathymetry_filepath,
     s2_transform,
     s2_shape,
-    no_data_value,
+    no_data_value=None,
     no_data_threshold=None,
 ):
     """Returns depth raster projected onto the Sentinel 2 mosaic.
