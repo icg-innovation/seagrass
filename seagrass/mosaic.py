@@ -10,7 +10,7 @@ from shapely.geometry import box
 def create_s2_mosaic(
     s2_file_list,
     bathymetry_filepath,
-    bands,
+    bands=None,
     scale=10000
 ):
     """Generates a Sentinel 2 mosaic for the areas intersecting the input
