@@ -5,7 +5,7 @@ from seagrass.mosaic import create_s2_mosaic, return_s2_mosaic_projected_depth
 
 
 def open_from_json(json_filepath):
-    """Opens Sentinel 2 and bathymetry rasters from json file
+    """Opens Sentinel 2 and bathymetry rasters from json file.
 
     Args:
         json_filepath (str): Filepath to json file containing image filepaths
@@ -64,7 +64,7 @@ def open_sentinel2_mosaic_and_matched_depth(
 
     Args:
         sentinel2_filepath_list (str): List of filepaths pointing towards
-        Sentinel 2 raster files to be merged into a single mosaic.
+            Sentinel 2 raster files to be merged into a single mosaic.
         bathymetry_filepath (str): Filepath to the bathymetry raster
             file.
         sentinel2_bands (list, optional): List of integers corresponding to
