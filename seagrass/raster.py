@@ -52,7 +52,7 @@ def open_from_json(json_filepath):
 
 
 def open_sentinel2_mosaic_and_matched_depth(
-    sentinel2_filepath,
+    sentinel2_filepath_list,
     bathymetry_filepath,
     sentinel2_bands=None,
     sentinel2_scale=10000,
@@ -63,8 +63,8 @@ def open_sentinel2_mosaic_and_matched_depth(
     projections.
 
     Args:
-        sentinel2_filepath (str): Filepath to the Sentinel 2 raster
-            file.
+        sentinel2_filepath_list (str): List of filepaths pointing towards
+        Sentinel 2 raster files to be merged into a single mosaic.
         bathymetry_filepath (str): Filepath to the bathymetry raster
             file.
         sentinel2_bands (list, optional): List of integers corresponding to
@@ -83,7 +83,7 @@ def open_sentinel2_mosaic_and_matched_depth(
         and a bathymetry raster.
     """
     sentinel2_mosaic, sentinel2_transform = create_s2_mosaic(
-        sentinel2_filepath,
+        sentinel2_filepath_list,
         bathymetry_filepath,
         sentinel2_bands,
         sentinel2_scale
