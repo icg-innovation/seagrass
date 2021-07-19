@@ -89,7 +89,7 @@ def open_sentinel2_mosaic_and_matched_depth(
         sentinel2_scale
     )
 
-    bathymetry, _ = return_s2_mosaic_projected_depth(
+    bathymetry = return_s2_mosaic_projected_depth(
         bathymetry_filepath,
         sentinel2_transform,
         sentinel2_mosaic.shape,
