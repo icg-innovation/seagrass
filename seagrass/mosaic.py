@@ -1,4 +1,3 @@
-from glob import glob
 import numpy as np
 import rasterio
 from rasterio.merge import merge
@@ -9,16 +8,17 @@ from shapely.geometry import box
 
 
 def create_s2_mosaic(
-    s2_filepath,
+    s2_file_list,
     bathymetry_filepath,
-    bands,
+    bands=None,
     scale=10000
 ):
     """Generates a Sentinel 2 mosaic for the areas intersecting the input
     bathymetry raster.
 
     Args:
-        s2_filepath (str): Directory containing the Sentinel 2 raster files.
+        s2_filepath (str): List of filepaths of Sentinel 2 rasters to be
+            merged.
         bathymetry_filepath (str): Filepath to the bathymetry raster
             file.
         bands (list): List of integers corresponding to the desired Sentinel 2
@@ -31,7 +31,6 @@ def create_s2_mosaic(
         A tuple containing the output raster mosaic and the
         affine transform matrix.
     """
-    s2_file_list = sorted(glob(s2_filepath))
     s2_raster_list = [rasterio.open(file) for file in s2_file_list]
     bathymetry_raster = rasterio.open(bathymetry_filepath)
 
@@ -62,7 +61,7 @@ def return_s2_mosaic_projected_depth(
     bathymetry_filepath,
     s2_transform,
     s2_shape,
-    no_data_value,
+    no_data_value=None,
     no_data_threshold=None,
 ):
     """Returns depth raster projected onto the Sentinel 2 mosaic.

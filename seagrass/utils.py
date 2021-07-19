@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+import json
+
 
 def save_training_data(filepath, X, y, type=None, **kwargs):
     """Save training data in desired format.
@@ -140,3 +142,44 @@ def extract_training_data_csv(filepath):
     y = data.iloc[:, -1].values.reshape(-1, 1)
 
     return X, y
+
+
+def make_json(
+    output_filepath,
+    sentinel2_filepath,
+    bathymetry_filepath,
+    sentinel2_bands=None,
+    sentinel2_scale=10000,
+    bathymetry_nodata=None,
+    bathymetry_nodata_threshold=None,
+):
+    """Creates import json file and saves to disk.
+
+    Args:
+        output_filepath (str): Filepath for output json.
+        sentinel2_filepath (str): Filepath to the Sentinel 2 raster
+            file.
+        bathymetry_filepath (str): Filepath to the bathymetry raster
+            file.
+        sentinel2_bands (list, optional): List of integers corresponding to
+            the desired Sentinel 2 bands. WARNING: There is an issue when
+            specifying more than four bands.
+        sentinel2_scale (int, optional): Scale factor to obtain the true
+            Sentinel 2 pixel value. Defaults to 10000.
+        bathymetry_nodata (int, optional): Integer value representing pixels
+            containing no data.
+        bathymetry_nodata_threshold (float, optional): Determines threshold
+            where pixels with values less than bathymetry_nodata_threshold
+            will be set equal to bathymetry_nodata instead.
+    """
+    output_dict = {
+        "sentinel2_filepath": sentinel2_filepath,
+        "bathymetry_filepath": bathymetry_filepath,
+        "sentinel2_bands": sentinel2_bands,
+        "sentinel2_scale": sentinel2_scale,
+        "bathymetry_nodata": bathymetry_nodata,
+        "bathymetry_nodata_threshold": bathymetry_nodata_threshold,
+    }
+
+    with open(output_filepath, "w") as f:
+        json.dump(output_dict, f)
