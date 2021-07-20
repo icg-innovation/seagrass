@@ -30,7 +30,7 @@ def save_training_data(filepath, X, y, filetype=None, **kwargs):
         raise ValueError("Invalid filetype! Check your filepath.")
 
 
-def save_training_data_modulos(tar_filepath, X, y):
+def save_training_data_modulos(tar_filepath, X, y, **kwargs):
     """Save training data in format to be passed to modulos.
 
     Args:
@@ -62,7 +62,7 @@ def save_training_data_modulos(tar_filepath, X, y):
     with open(json_filepath, "w") as f:
         json.dump(data_structure, f, indent=4)
 
-    save_training_data_csv(csv_filepath, X, y)
+    save_training_data_csv(csv_filepath, X, y, **kwargs)
 
     with tarfile.open(tar_filepath, "w") as tar:
         tar.add(csv_filepath, arcname=csv_filename)
