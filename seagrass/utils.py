@@ -69,7 +69,7 @@ def save_training_data_modulos(tar_filepath, X, y, **kwargs):
     with open(json_filepath, "w") as f:
         json.dump(data_structure, f, indent=4)
 
-    save_training_data_csv(csv_filepath, X, y, index=False, **kwargs)
+    save_training_data_csv(csv_filepath, X, y, **kwargs)
 
     with tarfile.open(tar_filepath, "w") as tar:
         tar.add(csv_filepath, arcname=csv_filename)
