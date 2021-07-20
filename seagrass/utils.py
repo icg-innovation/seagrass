@@ -48,7 +48,9 @@ def save_training_data_modulos(tar_filepath, X, y, **kwargs):
         directory = "."
 
     tmp_dir = f"{directory}/tmp"
-    os.mkdir(tmp_dir)
+
+    if not(os.path.exists(tmp_dir) and os.path.isdir(tmp_dir)):
+        os.mkdir(tmp_dir)
 
     csv_filename = f"{filename_noext}.csv"
     csv_filepath = f"{tmp_dir}/{csv_filename}"
@@ -116,7 +118,7 @@ def save_training_data_csv(filepath, X, y, **kwargs):
     cols = kwargs.pop("column_labels", None)
 
     df = pd.DataFrame(np.hstack([X, y]), columns=cols)
-    df.to_csv(filepath, **kwargs)
+    df.to_csv(filepath, index=False, **kwargs)
 
 
 def extract_training_data(filepath, filetype=None):
