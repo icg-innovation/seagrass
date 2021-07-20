@@ -33,7 +33,7 @@ def save_training_data(filepath, X, y, filetype=None, **kwargs):
 def save_training_data_modulos(tar_filepath, X, y, **kwargs):
     """Save training data in a tar format to be passed onto Modulos. Outputs a csv
     file, a data structure json file and a tar file containing both the csv and
-    json files. TODO: Make the csv and json files temporary files.
+    json files.
 
     Args:
         tar_filepath (str): Filepath to save tar file.
@@ -47,11 +47,14 @@ def save_training_data_modulos(tar_filepath, X, y, **kwargs):
     if directory == "":
         directory = "."
 
+    tmp_dir = f"{directory}/tmp"
+    os.mkdir(tmp_dir)
+
     csv_filename = f"{filename_noext}.csv"
-    csv_filepath = f"{directory}/{csv_filename}"
+    csv_filepath = f"{tmp_dir}/{csv_filename}"
 
     json_filename = "data_structure.json"
-    json_filepath = f"{directory}/data_structure.json"
+    json_filepath = f"{tmp_dir}/data_structure.json"
 
     structure_dict = {
         "type": "table",
@@ -69,6 +72,10 @@ def save_training_data_modulos(tar_filepath, X, y, **kwargs):
     with tarfile.open(tar_filepath, "w") as tar:
         tar.add(csv_filepath, arcname=csv_filename)
         tar.add(json_filepath, arcname=json_filename)
+
+    os.remove(csv_filepath)
+    os.remove(json_filepath)
+    os.rmdir(tmp_dir)
 
 
 def save_training_data_npy(filepath, X, y):
