@@ -14,7 +14,7 @@ def save_training_data(filepath, X, y, filetype=None, **kwargs):
         X (numpy.ndarray): Training data features.
         y (numpy.ndarray): Machine learning target values.
         filetype (str, optional): Desired file type. Accepted options are
-            currently `npy` and `csv`.
+            currently `npy`, `csv` and `tar`.
     """
 
     if filetype is None:
@@ -31,6 +31,47 @@ def save_training_data(filepath, X, y, filetype=None, **kwargs):
 
     else:
         raise ValueError("Invalid filetype! Check your filepath.")
+
+
+def save_training_data_npy(filepath, X, y):
+    """Save training data in npy format.
+
+    Args:
+        filepath (str): Filepath to save training data.
+        X (numpy.ndarray): Training data features.
+        y (numpy.ndarray): Machine learning target values.
+    """
+
+    filepath_extension = filepath.split(".")[-1]
+    if filepath_extension != "npy":
+        raise ValueError(
+            f"Extension .{filepath_extension} is not valid for "
+            "the specified filetype! Check the input filepath."
+        )
+
+    np.save(filepath, np.hstack([X, y]))
+
+
+def save_training_data_csv(filepath, X, y, **kwargs):
+    """Save training data in csv format.
+
+    Args:
+        filepath (str): Filepath to save training data.
+        X (numpy.ndarray): Training data features.
+        y (numpy.ndarray): Machine learning target values.
+    """
+
+    filepath_extension = filepath.split(".")[-1]
+    if filepath_extension != "csv":
+        raise ValueError(
+            f"Extension .{filepath_extension} is not valid for "
+            "the specified filetype! Check the input filepath."
+        )
+
+    cols = kwargs.pop("column_labels", None)
+
+    df = pd.DataFrame(np.hstack([X, y]), columns=cols)
+    df.to_csv(filepath, index=False, **kwargs)
 
 
 def save_training_data_modulos(tar_filepath, X, y, **kwargs):
@@ -81,47 +122,6 @@ def save_training_data_modulos(tar_filepath, X, y, **kwargs):
     os.remove(csv_filepath)
     os.remove(json_filepath)
     os.rmdir(tmp_dir)
-
-
-def save_training_data_npy(filepath, X, y):
-    """Save training data in npy format.
-
-    Args:
-        filepath (str): Filepath to save training data.
-        X (numpy.ndarray): Training data features.
-        y (numpy.ndarray): Machine learning target values.
-    """
-
-    filepath_extension = filepath.split(".")[-1]
-    if filepath_extension != "npy":
-        raise ValueError(
-            f"Extension .{filepath_extension} is not valid for "
-            "the specified filetype! Check the input filepath."
-        )
-
-    np.save(filepath, np.hstack([X, y]))
-
-
-def save_training_data_csv(filepath, X, y, **kwargs):
-    """Save training data in csv format.
-
-    Args:
-        filepath (str): Filepath to save training data.
-        X (numpy.ndarray): Training data features.
-        y (numpy.ndarray): Machine learning target values.
-    """
-
-    filepath_extension = filepath.split(".")[-1]
-    if filepath_extension != "csv":
-        raise ValueError(
-            f"Extension .{filepath_extension} is not valid for "
-            "the specified filetype! Check the input filepath."
-        )
-
-    cols = kwargs.pop("column_labels", None)
-
-    df = pd.DataFrame(np.hstack([X, y]), columns=cols)
-    df.to_csv(filepath, index=False, **kwargs)
 
 
 def extract_training_data(filepath, filetype=None):
