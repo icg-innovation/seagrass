@@ -31,7 +31,9 @@ def save_training_data(filepath, X, y, filetype=None, **kwargs):
 
 
 def save_training_data_modulos(tar_filepath, X, y, **kwargs):
-    """Save training data in format to be passed to modulos.
+    """Save training data in a tar format to be passed onto Modulos. Outputs a csv
+    file, a data structure json file and a tar file containing both the csv and
+    json files. TODO: Make the csv and json files temporary files.
 
     Args:
         tar_filepath (str): Filepath to save tar file.
