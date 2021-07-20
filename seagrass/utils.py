@@ -26,6 +26,9 @@ def save_training_data(filepath, X, y, filetype=None, **kwargs):
     elif filetype == "csv":
         save_training_data_csv(filepath, X, y, **kwargs)
 
+    elif filetype == "tar":
+        save_training_data_modulos(filepath, X, y, **kwargs)
+
     else:
         raise ValueError("Invalid filetype! Check your filepath.")
 
