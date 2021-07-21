@@ -98,7 +98,7 @@ def save_training_data_modulos(tar_filepath, X, y, **kwargs):
     csv_filename = f"{filename_noext}.csv"
     csv_filepath = f"{tmp_dir}/{csv_filename}"
 
-    json_filename = "data_structure.json"
+    json_filename = "dataset_structure.json"
     json_filepath = f"{tmp_dir}/data_structure.json"
 
     structure_dict = {
