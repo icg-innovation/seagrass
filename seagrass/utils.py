@@ -1,31 +1,34 @@
 import numpy as np
 import pandas as pd
 
+import os
 import json
+import tarfile
 
 
-def save_training_data(filepath, X, y, type=None, **kwargs):
+def save_training_data(filepath, X, y, filetype=None, **kwargs):
     """Save training data in desired format.
 
     Args:
         filepath (str): Filepath to save training data.
         X (numpy.ndarray): Training data features.
         y (numpy.ndarray): Machine learning target values.
-        type (str, optional): Desired file type. Accepted options are
-            currently `npy` and `csv`.
+        filetype (str, optional): Desired file type. Accepted options are
+            currently `npy`, `csv` and `tar`.
     """
 
-    if type is None:
-        type = filepath.split('.')[-1]
+    if filetype is None:
+        filetype = filepath.split('.')[-1]
 
-    if type == "npy":
+    if filetype == "npy":
         save_training_data_npy(filepath, X, y)
 
-    elif type == "csv":
+    elif filetype == "csv":
         save_training_data_csv(filepath, X, y, **kwargs)
 
-    elif type == "modulos":
+    elif filetype == "tar":
         save_training_data_modulos(filepath, X, y, **kwargs)
+
     else:
         raise ValueError("Invalid filetype! Check your filepath.")
 
@@ -68,40 +71,76 @@ def save_training_data_csv(filepath, X, y, **kwargs):
     cols = kwargs.pop("column_labels", None)
 
     df = pd.DataFrame(np.hstack([X, y]), columns=cols)
-    df.to_csv(filepath, **kwargs)
+    df.to_csv(filepath, index=False, **kwargs)
 
 
-def save_training_data_modulos(filepath, X, y, **kwargs):
-    """Save training data in format to be passed to modulos. WARNING: THIS
-    METHOD IS CURRENTLY A PLACEHOLDER AND IS YET TO BE WRITTEN.
+def save_training_data_modulos(tar_filepath, X, y, **kwargs):
+    """Save training data in a tar file (containing a csv file and a data
+    structure json file) to be passed onto Modulos.
 
     Args:
-        filepath (str): Filepath to save training data.
+        tar_filepath (str): Filepath to save tar file.
         X (numpy.ndarray): Training data features.
         y (numpy.ndarray): Machine learning target values.
     """
-    print("This function hasn't been written yet!")
-    pass
+
+    filename_noext = os.path.basename(tar_filepath).split('.')[0]
+    directory = os.path.dirname(tar_filepath)
+
+    if directory == "":
+        directory = "."
+
+    tmp_dir = f"{directory}/tmp"
+
+    if not(os.path.exists(tmp_dir) and os.path.isdir(tmp_dir)):
+        os.mkdir(tmp_dir)
+
+    csv_filename = f"{filename_noext}.csv"
+    csv_filepath = f"{tmp_dir}/{csv_filename}"
+
+    json_filename = "dataset_structure.json"
+    json_filepath = f"{tmp_dir}/data_structure.json"
+
+    structure_dict = {
+        "type": "table",
+        "path": csv_filename,
+        "name": filename_noext,
+    }
+    version_dict = {"_version": "0.2"}
+    data_structure = [structure_dict, version_dict]
+
+    with open(json_filepath, "w") as f:
+        json.dump(data_structure, f, indent=4)
+
+    save_training_data_csv(csv_filepath, X, y, **kwargs)
+
+    with tarfile.open(tar_filepath, "w") as tar:
+        tar.add(csv_filepath, arcname=csv_filename)
+        tar.add(json_filepath, arcname=json_filename)
+
+    os.remove(csv_filepath)
+    os.remove(json_filepath)
+    os.rmdir(tmp_dir)
 
 
-def extract_training_data(filepath, type=None):
+def extract_training_data(filepath, filetype=None):
     """Extract training data from file.
 
     Args:
         filepath (str): Filepath to the training data.
-        type (str, optional): Filetype of the training data.
+        filetype (str, optional): Filetype of the training data.
 
     Returns:
         tuple: Tuple containing training data features and target values for
         machine learning.
     """
 
-    if type is None:
-        type = filepath.split('.')[-1]
+    if filetype is None:
+        filetype = filepath.split('.')[-1]
 
-    if type == "npy":
+    if filetype == "npy":
         X, y = extract_training_data_npy(filepath)
-    elif type == "csv":
+    elif filetype == "csv":
         X, y = extract_training_data_csv(filepath)
     else:
         raise ValueError("Invalid filetype! Check your filepath.")
@@ -182,4 +221,4 @@ def make_json(
     }
 
     with open(output_filepath, "w") as f:
-        json.dump(output_dict, f)
+        json.dump(output_dict, f, indent=4)
