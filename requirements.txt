@@ -1,5 +1,6 @@
 coverage==5.5
 dask==2021.06.2
+geocube==0.0.17
 geopandas==0.9.0
 numpy~=1.19
 pandas==1.1.5
