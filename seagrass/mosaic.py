@@ -9,17 +9,17 @@ from shapely.geometry import box
 
 def create_s2_mosaic(
     s2_file_list,
-    bathymetry_filepath,
+    ground_truth_filepath,
     bands=None,
     scale=10000
 ):
     """Generates a Sentinel 2 mosaic for the areas intersecting the input
-    bathymetry raster.
+    ground truth raster.
 
     Args:
         s2_filepath (str): List of filepaths of Sentinel 2 rasters to be
             merged.
-        bathymetry_filepath (str): Filepath to the bathymetry raster
+        ground_truth_filepath (str): Filepath to the ground truth raster
             file.
         bands (list): List of integers corresponding to the desired Sentinel 2
             bands. WARNING: There is an issue when specifying more than four
@@ -32,11 +32,11 @@ def create_s2_mosaic(
         affine transform matrix.
     """
     s2_raster_list = [rasterio.open(file) for file in s2_file_list]
-    bathymetry_raster = rasterio.open(bathymetry_filepath)
+    ground_truth_raster = rasterio.open(ground_truth_filepath)
 
     intersecting_rasters = intersecting_tiles(
         s2_raster_list,
-        bathymetry_raster
+        ground_truth_raster
     )
 
     mosaic, transform = merge(
@@ -49,7 +49,7 @@ def create_s2_mosaic(
         mosaic,
         s2_raster_list[0].crs,
         transform,
-        bathymetry_raster.crs
+        ground_truth_raster.crs
     )
 
     mosaic /= scale
@@ -57,17 +57,17 @@ def create_s2_mosaic(
     return mosaic, transform
 
 
-def return_s2_mosaic_projected_depth(
-    bathymetry_filepath,
+def return_s2_mosaic_projected_ground_truth(
+    ground_truth_filepath,
     s2_transform,
     s2_shape,
     no_data_value=None,
     no_data_threshold=None,
 ):
-    """Returns depth raster projected onto the Sentinel 2 mosaic.
+    """Returns ground truth raster projected onto the Sentinel 2 mosaic.
 
     Args:
-        bathymetry_filepath (str): Filepath to the bathymetry raster
+        ground_truth_filepath (str): Filepath to the ground truth raster
             file.
         s2_transform (numpy.ndarray): Transform matrix generated when creating
             the Sentinel 2 mosaic.
@@ -79,30 +79,30 @@ def return_s2_mosaic_projected_depth(
             no_data_value instead.
 
     Returns:
-        numpy.ndarray: Projected depth raster data.
+        numpy.ndarray: Projected ground truth raster data.
     """
-    bathymetry_data = rasterio.open(bathymetry_filepath)
-    bathymetry_raster = bathymetry_data.read(1)
+    ground_truth_data = rasterio.open(ground_truth_filepath)
+    ground_truth_raster = ground_truth_data.read(1)
 
     if no_data_threshold:
-        bathymetry_raster[
-            bathymetry_raster < no_data_threshold
+        ground_truth_raster[
+            ground_truth_raster < no_data_threshold
         ] = no_data_value
 
     # Resamples to Sentinel 2 image resolution?
-    depth, _ = reproject(
-        bathymetry_raster,
+    s2_projected_ground_truth, _ = reproject(
+        ground_truth_raster,
         np.zeros((1, s2_shape[-2], s2_shape[-1]), dtype=np.float32),
-        src_transform=bathymetry_data.transform,
-        src_crs=bathymetry_data.crs,
+        src_transform=ground_truth_data.transform,
+        src_crs=ground_truth_data.crs,
         src_nodata=no_data_value,
         dst_transform=s2_transform,
-        dst_crs=bathymetry_data.crs,
+        dst_crs=ground_truth_data.crs,
         dst_resolution=10,
         resampling=Resampling.bilinear,
     )
 
-    return depth
+    return s2_projected_ground_truth
 
 
 def intersecting_tiles(raster_list, reference_raster):

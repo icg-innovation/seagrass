@@ -29,15 +29,15 @@ def return_features(data, bands=None):
 
 def create_training_data(
     s2_data,
-    bathymetry_data,
+    ground_truth_data,
     no_data_value,
     s2_bands=None,
 ):
-    """Turns the input s2_data and depth map into training data.
+    """Turns the input s2_data and ground truth map into training data.
 
     Args:
         s2_data (np.ndarray): Input s2 raster.
-        bathymetry_data (np.ndarray): Input bathymetry raster.
+        ground_truth_data (np.ndarray): Input ground truth raster.
         no_data_value (int): Integer value representing pixels containing no
             data.
         s2_bands (list, optional): List of indices corresponding to the desired
@@ -54,10 +54,10 @@ def create_training_data(
         s2_bands = list(np.arange(len(s2_data)))
 
     # Find no_data values; mask is true where there is valid data
-    mask = bathymetry_data != no_data_value
-    # Keep only values with depth data
+    mask = ground_truth_data != no_data_value
+    # Keep only values with ground truth data
     X = return_features(s2_data, s2_bands)[mask.ravel()]
-    # Flip the depth to positive values
-    y = abs(bathymetry_data)[mask].copy().reshape(-1, 1)
+    # Flip the ground truth to positive values - maybe should change this
+    y = abs(ground_truth_data)[mask].copy().reshape(-1, 1)
 
     return X, y
