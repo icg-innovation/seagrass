@@ -24,6 +24,7 @@ VERSION = '0.1.0'
 REQUIRED = [
     "dask==2021.06.2",
     "geopandas==0.9.0",
+    "geocube==0.0.17",
     "numpy~=1.19",
     "pandas==1.1.5",
     "rasterio==1.2.6",

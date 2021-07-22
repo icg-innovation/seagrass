@@ -1,9 +1,12 @@
-import numpy as np
-import pandas as pd
-
 import os
 import json
 import tarfile
+
+import numpy as np
+import pandas as pd
+import geopandas as gpd
+
+from geocube.api.core import make_geocube
 
 
 def save_training_data(filepath, X, y, filetype=None, **kwargs):
@@ -222,3 +225,25 @@ def make_json(
 
     with open(output_filepath, "w") as f:
         json.dump(output_dict, f, indent=4)
+
+
+def shape_to_binary_raster(shp_filepath, out_dir):
+    """Converts vector shapefile into a binary raster file.
+
+    Args:
+        shp_filepath (str): Filepath to the shapefile.
+        out_dir (str): Output directory to store the binary raster.
+    """
+    filename = os.path.basename(shp_filepath).split(".")[0]
+
+    geo_df = gpd.read_file(shp_filepath)
+    geo_df["data"] = 1   # Data to fill pixel values with.
+
+    out_grid = make_geocube(
+        vector_data=geo_df,
+        measurements=["data"],
+        resolution=(-10, 10),
+        fill=0,
+    )
+
+    out_grid["data"].rio.to_raster(f"{out_dir}/{filename}.tif")
