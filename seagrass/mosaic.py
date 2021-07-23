@@ -99,7 +99,7 @@ def return_s2_mosaic_projected_ground_truth(
         dst_transform=s2_transform,
         dst_crs=ground_truth_data.crs,
         dst_resolution=10,
-        resampling=Resampling.bilinear,
+        resampling=Resampling.nearest,
     )
 
     return s2_projected_ground_truth
@@ -146,6 +146,7 @@ def change_crs(data, src_crs, src_transform, dst_crs):
         np.ndarray: Raster reprojected to new coordinate system.
     """
     data_bounds = array_bounds(data.shape[1], data.shape[2], src_transform)
+    no_of_channels = data.shape[0]
 
     new_transform, width, height = calculate_default_transform(
         src_crs,
@@ -158,7 +159,7 @@ def change_crs(data, src_crs, src_transform, dst_crs):
 
     reprojected, transform = reproject(
         data,
-        np.zeros((4, width, height), dtype=np.float32),
+        np.zeros((no_of_channels, width, height), dtype=np.float32),
         src_transform=src_transform,
         src_crs=src_crs,
         src_nodata=None,
