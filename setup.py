@@ -17,7 +17,7 @@ DESCRIPTION = 'A companion module for the UoP SDB seagrass project.'
 URL = 'https://github.com/Max-FM/seagrass'
 EMAIL = 'max.foxley-marrable@port.ac.uk'
 AUTHOR = 'Max Foxley-Marrable, Andrew Lundgren'
-REQUIRES_PYTHON = '>=3.6.0'
+REQUIRES_PYTHON = '>=3.6.0, <3.8'
 VERSION = '0.1.0'
 
 # What packages are required for this module to be executed?
