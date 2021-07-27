@@ -103,6 +103,25 @@ def open_and_match_rasters_mosaic(
     return sentinel2_mosaic, ground_truth
 
 
+def open_sentinel2_image(sentinel2_filepath, sentinel2_scale=10000):
+    """Opens and returns the specified Sentinel 2 image, scaled to the true
+    pixel value.
+
+    Args:
+        sentinel2_filepath (str): Filepath to the Sentinel 2 raster
+            file.
+        sentinel2_scale (int, optional): Scale factor to obtain the true
+            Sentinel 2 pixel value. Defaults to 10000.
+
+    Returns:
+         xarray.DataArray: Sentinel 2
+    """
+    sentinel2_raster = rioxarray.open_rasterio(sentinel2_filepath)
+    sentinel2_raster /= sentinel2_scale
+
+    return sentinel2_raster
+
+
 def open_and_match_rasters(
     sentinel2_filepath,
     ground_truth_filepath,
@@ -121,8 +140,7 @@ def open_and_match_rasters(
         tuple: Tuple of xarray.DataArrays containing a Sentinel 2 raster
         and a ground truth raster.
     """
-    sentinel2 = rioxarray.open_rasterio(sentinel2_filepath)
-    sentinel2 /= sentinel2_scale
+    sentinel2 = open_sentinel2_image(sentinel2_filepath, sentinel2_scale)
 
     ground_truth = rioxarray.open_rasterio(ground_truth_filepath)
     ground_truth = ground_truth.rio.reproject_match(sentinel2)
