@@ -227,9 +227,10 @@ def make_json(
         json.dump(output_dict, f, indent=4)
 
 
-def save_prediction_data(tar_filepath, prediction_features, **kwargs):
+def save_prediction_features(tar_filepath, prediction_features, **kwargs):
     """Save prediction features in a tar file (containing a csv file and a data
-    structure json file) to be passed onto Modulos.
+    structure json file) to be passed onto the trained Modulos machine
+    learning model.
 
     Args:
         tar_filepath (str): Filepath to save tar file.

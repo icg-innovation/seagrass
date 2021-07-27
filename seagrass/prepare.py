@@ -63,11 +63,12 @@ def create_training_data(
     return X, y
 
 
-def create_prediction_data(
+def create_prediction_features(
     s2_data,
     s2_bands=None,
 ):
-    """Turns the input s2_data into prediction data.
+    """Turns the input s2_data into prediction features to be passed to the
+    machine learning model.
 
     Args:
         s2_data (np.ndarray): Input s2 raster.
