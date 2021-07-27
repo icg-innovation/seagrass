@@ -22,17 +22,14 @@ VERSION = '0.1.0'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    "dask==2021.06.2",
     "geopandas==0.9.0",
     "geocube==0.0.17",
     "numpy~=1.19",
     "pandas==1.1.5",
     "rasterio==1.2.6",
     "rioxarray==0.4.3",
-    "scipy==1.7.0",
+    "scipy~=1.4",
     "shapely==1.7.1",
-    "scikit-learn==0.24.2",
-    "tensorflow==2.5.0",
     "xarray==0.18.2",
 ]
 

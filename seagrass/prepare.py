@@ -61,3 +61,30 @@ def create_training_data(
     y = abs(ground_truth_data)[mask].copy().reshape(-1, 1)
 
     return X, y
+
+
+def create_prediction_features(
+    s2_data,
+    s2_bands=None,
+):
+    """Turns the input s2_data into prediction features to be passed to the
+    machine learning model.
+
+    Args:
+        s2_data (np.ndarray): Input s2 raster.
+        s2_bands (list, optional): List of indices corresponding to the desired
+            raster bands. WARNING: If using the bands attr when creating a
+            Sentinel 2 mosaic, these indices may differ as order is reset when
+            creating a mosaic, e.g. [1,2,4,6] --> [0,1,2,3]. Defaults to None.
+
+    Returns:
+        tuple: Tuple of numpy ndarrays with input features and ground truth
+        values.
+    """
+
+    if s2_bands is None:
+        s2_bands = list(np.arange(len(s2_data)))
+
+    prediction_features = return_features(s2_data, s2_bands)
+
+    return prediction_features

@@ -227,6 +227,66 @@ def make_json(
         json.dump(output_dict, f, indent=4)
 
 
+def save_prediction_features(tar_filepath, prediction_features, **kwargs):
+    """Save prediction features in a tar file (containing a csv file and a data
+    structure json file) to be passed onto the trained Modulos machine
+    learning model.
+
+    Args:
+        tar_filepath (str): Filepath to save tar file.
+        X (numpy.ndarray): Training data features.
+        y (numpy.ndarray): Machine learning target values.
+    """
+
+    filepath_extension = tar_filepath.split(".")[-1]
+
+    if filepath_extension != "tar":
+        raise ValueError(
+            "Output is required to be in .tar format."
+        )
+
+    filename_noext = os.path.basename(tar_filepath).split('.')[0]
+    directory = os.path.dirname(tar_filepath)
+
+    if directory == "":
+        directory = "."
+
+    tmp_dir = f"{directory}/tmp"
+
+    if not(os.path.exists(tmp_dir) and os.path.isdir(tmp_dir)):
+        os.mkdir(tmp_dir)
+
+    csv_filename = f"{filename_noext}.csv"
+    csv_filepath = f"{tmp_dir}/{csv_filename}"
+
+    json_filename = "dataset_structure.json"
+    json_filepath = f"{tmp_dir}/data_structure.json"
+
+    structure_dict = {
+        "type": "table",
+        "path": csv_filename,
+        "name": filename_noext,
+    }
+    version_dict = {"_version": "0.2"}
+    data_structure = [structure_dict, version_dict]
+
+    with open(json_filepath, "w") as f:
+        json.dump(data_structure, f, indent=4)
+
+    cols = kwargs.pop("column_labels", None)
+
+    df = pd.DataFrame(prediction_features, columns=cols)
+    df.to_csv(csv_filepath, **kwargs)
+
+    with tarfile.open(tar_filepath, "w") as tar:
+        tar.add(csv_filepath, arcname=csv_filename)
+        tar.add(json_filepath, arcname=json_filename)
+
+    os.remove(csv_filepath)
+    os.remove(json_filepath)
+    os.rmdir(tmp_dir)
+
+
 def shape_to_binary_raster(shp_filepath, out_dir):
     """Converts vector shapefile into a binary raster file.
 
