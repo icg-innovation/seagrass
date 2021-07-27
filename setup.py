@@ -28,7 +28,7 @@ REQUIRED = [
     "pandas==1.1.5",
     "rasterio==1.2.6",
     "rioxarray==0.4.3",
-    "scipy~=1.7",
+    "scipy~=1.4",
     "shapely==1.7.1",
     "xarray==0.18.2",
 ]
