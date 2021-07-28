@@ -97,11 +97,10 @@ def save_ml_data_csv(filepath, data, data_purpose, **kwargs):
     cols = kwargs.pop("column_labels", None)
 
     if data_purpose == "training":
-        df = pd.DataFrame(np.hstack(data), columns=cols)
-        df.to_csv(filepath, index=False, **kwargs)
-    elif data_purpose == "prediction":
-        df = pd.DataFrame(data, columns=cols)
-        df.to_csv(filepath, **kwargs)
+        data = np.hstack(data)
+
+    df = pd.DataFrame(data, columns=cols)
+    df.to_csv(filepath, index=False, **kwargs)
 
 
 def save_ml_data_modulos(
