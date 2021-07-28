@@ -28,7 +28,7 @@ def save_training_data(filepath, X, y, filetype=None, **kwargs):
         save_training_data_npy(filepath, X, y)
 
     elif filetype == "csv":
-        save_training_data_csv(filepath, X, y, **kwargs)
+        save_ml_data_csv(filepath, [X, y], 'training', **kwargs)
 
     elif filetype == "tar":
         save_ml_data_modulos(filepath, [X, y], 'training', **kwargs)
@@ -69,14 +69,23 @@ def save_training_data_npy(filepath, X, y):
     np.save(filepath, np.hstack([X, y]))
 
 
-def save_training_data_csv(filepath, X, y, **kwargs):
+def save_ml_data_csv(filepath, data, data_purpose, **kwargs):
     """Save training data in csv format.
 
     Args:
         filepath (str): Filepath to save training data.
-        X (numpy.ndarray): Training data features.
-        y (numpy.ndarray): Machine learning target values.
+        data (numpy.ndarray or tuple or list): Input data for the machine
+            learning model. Can be a single numpy array containing features for
+            predictions, or a tuple/list containing both features and target
+            values for training.
+        data_purpose (str): The purpose of the input data. Accepted inputs are
+            'training' and 'prediction'.
     """
+    if data_purpose != "training" or data_purpose != "prediction":
+        raise ValueError(
+            "Must specify purpose of input machine learning data! "
+            "Accepted values are 'training' and 'prediction'."
+        )
 
     filepath_extension = filepath.split(".")[-1]
     if filepath_extension != "csv":
@@ -87,8 +96,12 @@ def save_training_data_csv(filepath, X, y, **kwargs):
 
     cols = kwargs.pop("column_labels", None)
 
-    df = pd.DataFrame(np.hstack([X, y]), columns=cols)
-    df.to_csv(filepath, index=False, **kwargs)
+    if data_purpose == "training":
+        df = pd.DataFrame(np.hstack(data), columns=cols)
+        df.to_csv(filepath, index=False, **kwargs)
+    elif data_purpose == "prediction":
+        df = pd.DataFrame(data, columns=cols)
+        df.to_csv(filepath, **kwargs)
 
 
 def save_ml_data_modulos(
@@ -104,7 +117,7 @@ def save_ml_data_modulos(
 
     Args:
         tar_filepath (str): Filepath to save tar file.
-        data(numpy.ndarray or tuple or list): Input data for the machine
+        data (numpy.ndarray or tuple or list): Input data for the machine
             learning model. Can be a single numpy array containing features for
             predictions, or a tuple/list containing both features and target
             values for training.
@@ -115,6 +128,12 @@ def save_ml_data_modulos(
             Otherwise it is not deleted.
     """
 
+    if data_purpose != "training" or data_purpose != "prediction":
+        raise ValueError(
+            "Must specify purpose of input machine learning data! "
+            "Accepted values are 'training' and 'prediction'."
+        )
+
     directory = os.path.dirname(tar_filepath)
     tmp_dir = _make_tmp_dir(directory)
 
@@ -124,24 +143,8 @@ def save_ml_data_modulos(
     json_filename = "dataset_structure.json"
     json_filepath = f"{tmp_dir}/data_structure.json"
 
+    save_ml_data_csv(csv_filepath, data, data_purpose, **kwargs)
     _make_data_structure_json(csv_filename, json_filepath)
-
-    if data_purpose == "training":
-        X = data[0]
-        y = data[1]
-        save_training_data_csv(csv_filepath, X, y, **kwargs)
-
-    elif data_purpose == "prediction":
-        prediction_features = data
-        cols = kwargs.pop("column_labels")
-        df = pd.DataFrame(prediction_features, columns=cols)
-        df.to_csv(csv_filepath, **kwargs)
-
-    else:
-        raise ValueError(
-            "Must specify purpose of input machine learning data! "
-            "Accepted values are 'training' and 'prediction'."
-        )
 
     with tarfile.open(tar_filepath, "w") as tar:
         tar.add(csv_filepath, arcname=csv_filename)
