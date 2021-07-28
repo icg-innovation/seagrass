@@ -11,10 +11,10 @@ from geocube.api.core import make_geocube
 
 
 def save_training_data(filepath, X, y, filetype=None, **kwargs):
-    """Save machine learning data in desired format.
+    """Save training data for machine learning in desired format.
 
     Args:
-        filepath (str): Filepath to save machine learning data.
+        filepath (str): Filepath to save training data.
         X (numpy.ndarray): Training data features.
         y (numpy.ndarray): Machine learning target values.
         filetype (str, optional): Desired file type. Accepted options are
@@ -38,8 +38,7 @@ def save_training_data(filepath, X, y, filetype=None, **kwargs):
 
 
 def save_prediction_features(filepath, features, filetype=None, **kwargs):
-    """Wrapper function for saving predictions in a Modulos compatible format.
-    Future work can be expand the function to other data formats.
+    """Save features for machine learning predictions in desired format.
 
     Args:
         filepath (str): Filepath to save prediction data.
