@@ -114,7 +114,7 @@ def open_sentinel2_image(sentinel2_filepath, sentinel2_scale=10000):
             Sentinel 2 pixel value. Defaults to 10000.
 
     Returns:
-         xarray.DataArray: Sentinel 2
+         xarray.DataArray: Sentinel 2 raster.
     """
     sentinel2_raster = rioxarray.open_rasterio(sentinel2_filepath)
     sentinel2_raster /= sentinel2_scale
