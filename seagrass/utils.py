@@ -11,10 +11,10 @@ from geocube.api.core import make_geocube
 
 
 def save_training_data(filepath, X, y, filetype=None, **kwargs):
-    """Save training data in desired format.
+    """Save machine learning data in desired format.
 
     Args:
-        filepath (str): Filepath to save training data.
+        filepath (str): Filepath to save machine learning data.
         X (numpy.ndarray): Training data features.
         y (numpy.ndarray): Machine learning target values.
         filetype (str, optional): Desired file type. Accepted options are
@@ -25,7 +25,7 @@ def save_training_data(filepath, X, y, filetype=None, **kwargs):
         filetype = filepath.split('.')[-1]
 
     if filetype == "npy":
-        save_training_data_npy(filepath, X, y)
+        save_ml_data_npy(filepath, [X, y], 'training')
 
     elif filetype == "csv":
         save_ml_data_csv(filepath, [X, y], 'training', **kwargs)
@@ -37,7 +37,7 @@ def save_training_data(filepath, X, y, filetype=None, **kwargs):
         raise ValueError("Invalid filetype! Check your filepath.")
 
 
-def save_prediction_features(filepath, prediction_features, **kwargs):
+def save_prediction_features(filepath, features, filetype=None, **kwargs):
     """Wrapper function for saving predictions in a Modulos compatible format.
     Future work can be expand the function to other data formats.
 
@@ -45,19 +45,42 @@ def save_prediction_features(filepath, prediction_features, **kwargs):
         filepath (str): Filepath to save prediction data.
         prediction_features (numpy.ndarray): Features to be passed to the
             machine learning model for prediction.
+        filetype (str, optional): Desired file type. Accepted options are
+            currently `npy`, `csv` and `tar`.
     """
+    if filetype is None:
+        filetype = filepath.split('.')[-1]
 
-    save_ml_data_modulos(filepath, prediction_features, 'prediction', **kwargs)
+    if filetype == "npy":
+        save_ml_data_npy(filepath, features, 'prediction')
+
+    elif filetype == "csv":
+        save_ml_data_csv(filepath, features, 'prediction', **kwargs)
+
+    elif filetype == "tar":
+        save_ml_data_modulos(filepath, features, 'prediction', **kwargs)
+
+    else:
+        raise ValueError("Invalid filetype! Check your filepath.")
 
 
-def save_training_data_npy(filepath, X, y):
-    """Save training data in npy format.
+def save_ml_data_npy(filepath, data, data_purpose):
+    """Save machine learning data in npy format.
 
     Args:
-        filepath (str): Filepath to save training data.
-        X (numpy.ndarray): Training data features.
-        y (numpy.ndarray): Machine learning target values.
+        filepath (str): Filepath to save machine learning data.
+        data (numpy.ndarray or tuple or list): Input data for the machine
+            learning model. Can be a single numpy array containing features for
+            predictions, or a tuple/list containing both features and target
+            values for training.
+        data_purpose (str): The purpose of the input data. Accepted inputs are
+            'training' and 'prediction'.
     """
+    if data_purpose != "training" or data_purpose != "prediction":
+        raise ValueError(
+            "Must specify purpose of input machine learning data! "
+            "Accepted values are 'training' and 'prediction'."
+        )
 
     filepath_extension = filepath.split(".")[-1]
     if filepath_extension != "npy":
@@ -65,15 +88,17 @@ def save_training_data_npy(filepath, X, y):
             f"Extension .{filepath_extension} is not valid for "
             "the specified filetype! Check the input filepath."
         )
+    if data_purpose == "training":
+        data = np.hstack(data)
 
-    np.save(filepath, np.hstack([X, y]))
+    np.save(filepath, data)
 
 
 def save_ml_data_csv(filepath, data, data_purpose, **kwargs):
-    """Save training data in csv format.
+    """Save machine learning data in csv format.
 
     Args:
-        filepath (str): Filepath to save training data.
+        filepath (str): Filepath to save machine learning data.
         data (numpy.ndarray or tuple or list): Input data for the machine
             learning model. Can be a single numpy array containing features for
             predictions, or a tuple/list containing both features and target
