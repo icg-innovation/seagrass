@@ -76,7 +76,7 @@ def save_ml_data_npy(filepath, data, data_purpose):
         data_purpose (str): The purpose of the input data. Accepted inputs are
             'training' and 'prediction'.
     """
-    if data_purpose != "training" or data_purpose != "prediction":
+    if data_purpose != "training" and data_purpose != "prediction":
         raise ValueError(
             "Must specify purpose of input machine learning data! "
             "Accepted values are 'training' and 'prediction'."
@@ -106,7 +106,7 @@ def save_ml_data_csv(filepath, data, data_purpose, **kwargs):
         data_purpose (str): The purpose of the input data. Accepted inputs are
             'training' and 'prediction'.
     """
-    if data_purpose != "training" or data_purpose != "prediction":
+    if data_purpose != "training" and data_purpose != "prediction":
         raise ValueError(
             "Must specify purpose of input machine learning data! "
             "Accepted values are 'training' and 'prediction'."
@@ -152,7 +152,7 @@ def save_ml_data_modulos(
             Otherwise it is not deleted.
     """
 
-    if data_purpose != "training" or data_purpose != "prediction":
+    if data_purpose != "training" and data_purpose != "prediction":
         raise ValueError(
             "Must specify purpose of input machine learning data! "
             "Accepted values are 'training' and 'prediction'."
