@@ -31,10 +31,23 @@ def save_training_data(filepath, X, y, filetype=None, **kwargs):
         save_training_data_csv(filepath, X, y, **kwargs)
 
     elif filetype == "tar":
-        save_training_data_modulos(filepath, X, y, **kwargs)
+        save_ml_data_modulos(filepath, [X, y], 'training', **kwargs)
 
     else:
         raise ValueError("Invalid filetype! Check your filepath.")
+
+
+def save_prediction_features(filepath, prediction_features, **kwargs):
+    """Wrapper function for saving predictions in a Modulos compatible format.
+    Future work can be expand the function to other data formats.
+
+    Args:
+        filepath (str): Filepath to save prediction data.
+        prediction_features (numpy.ndarray): Features to be passed to the
+            machine learning model for prediction.
+    """
+
+    save_ml_data_modulos(filepath, prediction_features, 'prediction', **kwargs)
 
 
 def save_training_data_npy(filepath, X, y):
@@ -78,19 +91,80 @@ def save_training_data_csv(filepath, X, y, **kwargs):
     df.to_csv(filepath, index=False, **kwargs)
 
 
-def save_training_data_modulos(tar_filepath, X, y, **kwargs):
-    """Save training data in a tar file (containing a csv file and a data
-    structure json file) to be passed onto Modulos.
+def save_ml_data_modulos(
+    tar_filepath,
+    data,
+    data_purpose,
+    delete_tmp=True,
+    **kwargs
+):
+    """Save data in a tar file (containing a csv file and a data structure
+    json file) to be passed onto a Modulos machine learning model for either
+    training or predictions.
 
     Args:
         tar_filepath (str): Filepath to save tar file.
-        X (numpy.ndarray): Training data features.
-        y (numpy.ndarray): Machine learning target values.
+        data(numpy.ndarray or tuple or list): Input data for the machine
+            learning model. Can be a single numpy array containing features for
+            predictions, or a tuple/list containing both features and target
+            values for training.
+        data_purpose (str): The purpose of the input data. Accepted inputs are
+            'training' and 'prediction'.
+        delete_tmp (bool): If True, then the 'tmp' directory containing the csv
+            and data structure json is deleted after creation of the tar file.
+            Otherwise it is not deleted.
     """
 
-    filename_noext = os.path.basename(tar_filepath).split('.')[0]
     directory = os.path.dirname(tar_filepath)
+    tmp_dir = _make_tmp_dir(directory)
 
+    csv_filename = f"{os.path.basename(tar_filepath).split('.')[0]}.csv"
+    csv_filepath = f"{tmp_dir}/{csv_filename}"
+
+    json_filename = "dataset_structure.json"
+    json_filepath = f"{tmp_dir}/data_structure.json"
+
+    _make_data_structure_json(csv_filename, json_filepath)
+
+    if data_purpose == "training":
+        X = data[0]
+        y = data[1]
+        save_training_data_csv(csv_filepath, X, y, **kwargs)
+
+    elif data_purpose == "prediction":
+        prediction_features = data
+        cols = kwargs.pop("column_labels")
+        df = pd.DataFrame(prediction_features, columns=cols)
+        df.to_csv(csv_filepath, **kwargs)
+
+    else:
+        raise ValueError(
+            "Must specify purpose of input machine learning data! "
+            "Accepted values are 'training' and 'prediction'."
+        )
+
+    with tarfile.open(tar_filepath, "w") as tar:
+        tar.add(csv_filepath, arcname=csv_filename)
+        tar.add(json_filepath, arcname=json_filename)
+
+    if delete_tmp is True:
+        rmtree(tmp_dir)
+
+
+def _make_data_structure_json(csv_filename, json_filepath):
+    structure_dict = {
+        "type": "table",
+        "path": csv_filename,
+        "name": csv_filename.split('.')[0],
+    }
+    version_dict = {"_version": "0.2"}
+    data_structure = [structure_dict, version_dict]
+
+    with open(json_filepath, "w") as f:
+        json.dump(data_structure, f, indent=4)
+
+
+def _make_tmp_dir(directory):
     if directory == "":
         directory = "."
 
@@ -99,30 +173,7 @@ def save_training_data_modulos(tar_filepath, X, y, **kwargs):
     if not(os.path.exists(tmp_dir) and os.path.isdir(tmp_dir)):
         os.mkdir(tmp_dir)
 
-    csv_filename = f"{filename_noext}.csv"
-    csv_filepath = f"{tmp_dir}/{csv_filename}"
-
-    json_filename = "dataset_structure.json"
-    json_filepath = f"{tmp_dir}/data_structure.json"
-
-    structure_dict = {
-        "type": "table",
-        "path": csv_filename,
-        "name": filename_noext,
-    }
-    version_dict = {"_version": "0.2"}
-    data_structure = [structure_dict, version_dict]
-
-    with open(json_filepath, "w") as f:
-        json.dump(data_structure, f, indent=4)
-
-    save_training_data_csv(csv_filepath, X, y, **kwargs)
-
-    with tarfile.open(tar_filepath, "w") as tar:
-        tar.add(csv_filepath, arcname=csv_filename)
-        tar.add(json_filepath, arcname=json_filename)
-
-    rmtree(tmp_dir)
+    return tmp_dir
 
 
 def extract_training_data(filepath, filetype=None):
@@ -224,64 +275,6 @@ def make_json(
 
     with open(output_filepath, "w") as f:
         json.dump(output_dict, f, indent=4)
-
-
-def save_prediction_features(tar_filepath, prediction_features, **kwargs):
-    """Save prediction features in a tar file (containing a csv file and a data
-    structure json file) to be passed onto the trained Modulos machine
-    learning model.
-
-    Args:
-        tar_filepath (str): Filepath to save tar file.
-        X (numpy.ndarray): Training data features.
-        y (numpy.ndarray): Machine learning target values.
-    """
-
-    filepath_extension = tar_filepath.split(".")[-1]
-
-    if filepath_extension != "tar":
-        raise ValueError(
-            "Output is required to be in .tar format."
-        )
-
-    filename_noext = os.path.basename(tar_filepath).split('.')[0]
-    directory = os.path.dirname(tar_filepath)
-
-    if directory == "":
-        directory = "."
-
-    tmp_dir = f"{directory}/tmp"
-
-    if not(os.path.exists(tmp_dir) and os.path.isdir(tmp_dir)):
-        os.mkdir(tmp_dir)
-
-    csv_filename = f"{filename_noext}.csv"
-    csv_filepath = f"{tmp_dir}/{csv_filename}"
-
-    json_filename = "dataset_structure.json"
-    json_filepath = f"{tmp_dir}/data_structure.json"
-
-    structure_dict = {
-        "type": "table",
-        "path": csv_filename,
-        "name": filename_noext,
-    }
-    version_dict = {"_version": "0.2"}
-    data_structure = [structure_dict, version_dict]
-
-    with open(json_filepath, "w") as f:
-        json.dump(data_structure, f, indent=4)
-
-    cols = kwargs.pop("column_labels", None)
-
-    df = pd.DataFrame(prediction_features, columns=cols)
-    df.to_csv(csv_filepath, **kwargs)
-
-    with tarfile.open(tar_filepath, "w") as tar:
-        tar.add(csv_filepath, arcname=csv_filename)
-        tar.add(json_filepath, arcname=json_filename)
-
-    rmtree(tmp_dir)
 
 
 def shape_to_binary_raster(shp_filepath, out_dir):
