@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 
+from shutil import rmtree
 from geocube.api.core import make_geocube
 
 
@@ -121,9 +122,7 @@ def save_training_data_modulos(tar_filepath, X, y, **kwargs):
         tar.add(csv_filepath, arcname=csv_filename)
         tar.add(json_filepath, arcname=json_filename)
 
-    os.remove(csv_filepath)
-    os.remove(json_filepath)
-    os.rmdir(tmp_dir)
+    rmtree(tmp_dir)
 
 
 def extract_training_data(filepath, filetype=None):
@@ -282,9 +281,7 @@ def save_prediction_features(tar_filepath, prediction_features, **kwargs):
         tar.add(csv_filepath, arcname=csv_filename)
         tar.add(json_filepath, arcname=json_filename)
 
-    os.remove(csv_filepath)
-    os.remove(json_filepath)
-    os.rmdir(tmp_dir)
+    rmtree(tmp_dir)
 
 
 def shape_to_binary_raster(shp_filepath, out_dir):
