@@ -179,6 +179,14 @@ def save_ml_data_modulos(
 
 
 def _make_data_structure_json(csv_filename, json_filepath):
+    """Makes a data_structure.json file to be included in a Modulos compatible
+    tar file.
+
+    Args:
+        csv_filename (str): Filename of the csv file to be included in the tar
+            file.
+        json_filepath (str): Filepath of output json file.
+    """
     structure_dict = {
         "type": "table",
         "path": csv_filename,
@@ -192,6 +200,15 @@ def _make_data_structure_json(csv_filename, json_filepath):
 
 
 def _make_tmp_dir(directory):
+    """Makes a temporary directory to store the generated csv and
+    data_structure.json files when creating a Modulos compatible tar file.
+
+    Args:
+        directory (str): Parent directory.
+
+    Returns:
+        str: Filepath of the temporary directory.
+    """
     if directory == "":
         directory = "."
 
