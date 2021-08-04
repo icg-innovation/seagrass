@@ -2,7 +2,7 @@ import numpy as np
 from scipy.ndimage import gaussian_filter
 
 
-def return_features(data, bands=None):
+def return_features(data, bands=None, blurring=False):
     """Returns a array of default features for the training data.
 
     Args:
@@ -20,9 +20,15 @@ def return_features(data, bands=None):
         bands = list(np.arange(len(data)))
 
     bands_1D = [data[band].ravel() for band in bands]
-    blurred_1D = [gaussian_filter(data[band], 2.).ravel() for band in bands]
 
-    all_bands = bands_1D + blurred_1D
+    if blurring:
+        blurred_1D = [
+            gaussian_filter(data[band], 2.0).ravel() for band in bands
+        ]
+        all_bands = bands_1D + blurred_1D
+
+    else:
+        all_bands = bands_1D
 
     return np.vstack(all_bands).T
 
