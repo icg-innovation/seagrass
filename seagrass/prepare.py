@@ -38,6 +38,7 @@ def create_training_data(
     ground_truth_data,
     no_data_value,
     s2_bands=None,
+    blurring=False,
 ):
     """Turns the input s2_data and ground truth map into training data.
 
@@ -62,7 +63,7 @@ def create_training_data(
     # Find no_data values; mask is true where there is valid data
     mask = ground_truth_data != no_data_value
     # Keep only values with ground truth data
-    X = return_features(s2_data, s2_bands)[mask.ravel()]
+    X = return_features(s2_data, s2_bands, blurring)[mask.ravel()]
     # Flip the ground truth to positive values - maybe should change this
     y = abs(ground_truth_data)[mask].copy().reshape(-1, 1)
 
@@ -72,6 +73,7 @@ def create_training_data(
 def create_prediction_features(
     s2_data,
     s2_bands=None,
+    blurring=False,
 ):
     """Turns the input s2_data into prediction features to be passed to the
     machine learning model.
@@ -91,6 +93,6 @@ def create_prediction_features(
     if s2_bands is None:
         s2_bands = list(np.arange(len(s2_data)))
 
-    prediction_features = return_features(s2_data, s2_bands)
+    prediction_features = return_features(s2_data, s2_bands, blurring)
 
     return prediction_features
