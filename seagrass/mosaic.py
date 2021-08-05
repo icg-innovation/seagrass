@@ -31,7 +31,6 @@ def create_s2_mosaic(
         A tuple containing the output raster mosaic and the
         affine transform matrix.
     """
-
     intersecting_rasters = intersecting_tiles(
         s2_file_list,
         ground_truth_filepath
