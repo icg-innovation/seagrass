@@ -31,16 +31,17 @@ def create_s2_mosaic(
         A tuple containing the output raster mosaic and the
         affine transform matrix.
     """
-    s2_raster_list = [rasterio.open(file) for file in s2_file_list]
-    ground_truth_raster = rasterio.open(ground_truth_filepath)
 
     intersecting_rasters = intersecting_tiles(
-        s2_raster_list,
-        ground_truth_raster
+        s2_file_list,
+        ground_truth_filepath
     )
 
+    s2_raster_list = [rasterio.open(file) for file in intersecting_rasters]
+    ground_truth_raster = rasterio.open(ground_truth_filepath)
+
     mosaic, transform = merge(
-        intersecting_rasters,
+        s2_raster_list,
         indexes=bands,
         dtype=np.float32
     )
@@ -105,7 +106,7 @@ def return_s2_mosaic_projected_ground_truth(
     return s2_projected_ground_truth
 
 
-def intersecting_tiles(raster_list, reference_raster):
+def intersecting_tiles(raster_filepath_list, reference_raster_filepath):
     """Returns list of raster objects that intersect with an input reference
     raster.
 
@@ -114,8 +115,12 @@ def intersecting_tiles(raster_list, reference_raster):
         reference_raster (rasterio.open object): Reference raster objects.
 
     Returns:
-        list: List of intersecting raster objects
+        list: List of intersecting raster objects.
     """
+
+    raster_list = [rasterio.open(file) for file in raster_filepath_list]
+    reference_raster = rasterio.open(reference_raster_filepath)
+
     ref = box(*reference_raster.bounds)
 
     boundary_boxes = GeoSeries(
@@ -124,7 +129,7 @@ def intersecting_tiles(raster_list, reference_raster):
     )
 
     intersecting_tiles = [
-        raster_list[idx]
+        raster_filepath_list[idx]
         for idx, bbox in enumerate(boundary_boxes.to_crs(reference_raster.crs))
         if ref.intersects(bbox)
     ]
