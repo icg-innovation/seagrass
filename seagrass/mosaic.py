@@ -117,7 +117,6 @@ def intersecting_tiles(raster_filepath_list, reference_raster_filepath):
     Returns:
         list: List of intersecting raster objects.
     """
-
     raster_list = [rasterio.open(file) for file in raster_filepath_list]
     reference_raster = rasterio.open(reference_raster_filepath)
 
