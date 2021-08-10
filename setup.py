@@ -35,7 +35,20 @@ REQUIRED = [
 
 # What packages are optional?
 EXTRAS = {
-    # 'fancy feature': ['django'],
+    'modulos': [
+        "scipy==1.4.1",
+        "scikit-learn==0.22",
+        "joblib==0.14.1",
+        "tensorflow==2.2.0",
+        "xgboost==1.0.2",
+        "bayesian-optimization==1.1.0",
+        "lightgbm==2.3.1",
+        "--find-links https://download.pytorch.org/whl/torch_stable.html",
+        "torch==1.6.0+cu101",
+        "torchvision==0.7.0+cu101",
+        "keras-tuner @ git+https://github.com/keras-team/keras-tuner.git@1.0.2rc1#egg=keras-tuner",  # noqa: E501
+        "autokeras==1.0.4",
+    ],
 }
 
 # The rest you shouldn't have to touch too much :)
