@@ -49,6 +49,7 @@ REQUIRED = _load_requirements(_PATH_ROOT, "requirements.txt")
 # What packages are optional?
 EXTRAS = {
     "modulos":  _load_requirements(_PATH_ROOT, "requirements-modulos.txt"),
+    "dev": _load_requirements(_PATH_ROOT, "requirements-dev.txt"),
 }
 
 # The rest you shouldn't have to touch too much :)
