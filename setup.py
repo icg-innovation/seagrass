@@ -11,6 +11,29 @@ from shutil import rmtree
 
 from setuptools import find_packages, setup, Command
 
+
+def _load_requirements(
+    path_dir,
+    file_name='requirements.txt',
+    comment_char='#',
+):
+    with open(os.path.join(path_dir, file_name), 'r') as file:
+        lines = [ln.strip() for ln in file.readlines()]
+    reqs = []
+    for ln in lines:
+        # filer all comments
+        if comment_char in ln:
+            ln = ln[:ln.index(comment_char)].strip()
+        # skip directly installed dependencies
+        if ln.startswith('http'):
+            continue
+        if ln:  # if requirement is not empty
+            reqs.append(ln)
+    return reqs
+
+
+_PATH_ROOT = os.path.dirname(__file__)
+
 # Package meta-data.
 NAME = 'seagrass'
 DESCRIPTION = 'A companion module for the UoP SDB seagrass project.'
@@ -21,33 +44,11 @@ REQUIRES_PYTHON = '>=3.6.0, <3.8'
 VERSION = '0.1.0'
 
 # What packages are required for this module to be executed?
-REQUIRED = [
-    "geopandas==0.9.0",
-    "geocube==0.0.17",
-    "numpy~=1.19",
-    "pandas==1.1.5",
-    "rasterio==1.2.6",
-    "rioxarray==0.4.3",
-    "scipy~=1.4",
-    "shapely==1.7.1",
-    "xarray==0.18.2",
-]
+REQUIRED = _load_requirements(_PATH_ROOT, "requirements.txt")
 
 # What packages are optional?
 EXTRAS = {
-    "modulos": [
-        "scikit-learn==0.22",
-        "joblib==0.14.1",
-        "tensorflow==2.2.0",
-        "xgboost==1.0.2",
-        "bayesian-optimization==1.1.0",
-        "lightgbm==2.3.1",
-        "--find-links https://download.pytorch.org/whl/torch_stable.html",
-        "torch==1.6.0+cu101",
-        "torchvision==0.7.0+cu101",
-        "keras-tuner @ git+https://github.com/keras-team/keras-tuner.git@1.0.2rc1#egg=keras-tuner",  # noqa: E501
-        "autokeras==1.0.4",
-    ]
+    "modulos":  _load_requirements(_PATH_ROOT, "requirements-modulos.txt"),
 }
 
 # The rest you shouldn't have to touch too much :)
