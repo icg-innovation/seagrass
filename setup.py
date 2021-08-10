@@ -35,8 +35,7 @@ REQUIRED = [
 
 # What packages are optional?
 EXTRAS = {
-    'modulos': [
-        "scipy==1.4.1",
+    "modulos": [
         "scikit-learn==0.22",
         "joblib==0.14.1",
         "tensorflow==2.2.0",
@@ -48,7 +47,7 @@ EXTRAS = {
         "torchvision==0.7.0+cu101",
         "keras-tuner @ git+https://github.com/keras-team/keras-tuner.git@1.0.2rc1#egg=keras-tuner",  # noqa: E501
         "autokeras==1.0.4",
-    ],
+    ]
 }
 
 # The rest you shouldn't have to touch too much :)
