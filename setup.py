@@ -37,7 +37,8 @@ def _load_requirements(path_dir, file_name='requirements.txt', comment_char='#')
 
 
 def _find_optional_installs(requirements_dir):
-    requirements_list = glob(os.path.join(requirements_dir), 'requirements-*.txt')
+    requirements_search = os.path.join(requirements_dir, 'requirements-*.txt')
+    requirements_list = glob(requirements_search)
 
     optional_dict = {}
     for requirements_filepath in requirements_list:
