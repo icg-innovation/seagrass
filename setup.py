@@ -8,17 +8,15 @@
 
 import io
 import os
+import re
 import sys
 from shutil import rmtree
+from glob import glob
 
 from setuptools import find_packages, setup, Command
 
 
-def _load_requirements(
-    path_dir,
-    file_name='requirements.txt',
-    comment_char='#',
-):
+def _load_requirements(path_dir, file_name='requirements.txt', comment_char='#'):
     with open(os.path.join(path_dir, file_name), 'r') as file:
         lines = [ln.strip() for ln in file.readlines()]
 
@@ -38,8 +36,20 @@ def _load_requirements(
     return reqs
 
 
+def _find_optional_installs(requirements_dir):
+    requirements_list = glob(os.path.join(requirements_dir), 'requirements-*.txt')
+
+    optional_dict = {}
+    for requirements_filepath in requirements_list:
+        filename = os.path.basename(requirements_filepath)
+        optional_name = re.search("\-(.*?)\.", filename).group(1)
+
+        optional_dict[optional_name] = _load_requirements(requirements_dir, filename)
+
+    return optional_dict
+
 root_path = os.path.abspath(os.path.dirname(__file__))
-requirements_path = os.path.join(root_path, 'requirements')
+requirements_dir = os.path.join(root_path, 'requirements')
 
 # Package meta-data.
 NAME = 'seagrass'
@@ -51,13 +61,11 @@ REQUIRES_PYTHON = '>=3.6.0, <3.8'
 VERSION = '0.1.0'
 
 # What packages are required for this module to be executed?
-REQUIRED = _load_requirements(requirements_path, "requirements.txt")
+REQUIRED = _load_requirements(requirements_dir, "requirements.txt")
 
 # What packages are optional?
-EXTRAS = {
-    "modulos": _load_requirements(requirements_path, "requirements-modulos.txt"),
-    "dev": _load_requirements(requirements_path, "requirements-dev.txt"),
-}
+EXTRAS = _find_optional_installs(requirements_dir)
+
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
