@@ -1,13 +1,10 @@
-coverage==5.5
+datacube==1.8.3
 geocube==0.0.17
 geopandas==0.9.0
 numpy~=1.19
 pandas==1.1.5
 rasterio==1.2.6
-recommonmark==0.7.1
 rioxarray==0.4.3
 scipy~=1.4
 shapely==1.7.1
-Sphinx==4.0.2
-sphinx-rtd-theme==0.5.2
 xarray==0.18.2
