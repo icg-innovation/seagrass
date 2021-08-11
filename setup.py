@@ -4,6 +4,8 @@
 # Note: To use the 'upload' functionality of this file, you must:
 #   $ pipenv install twine --dev
 
+# flake8: noqa
+
 import io
 import os
 import sys
@@ -19,20 +21,25 @@ def _load_requirements(
 ):
     with open(os.path.join(path_dir, file_name), 'r') as file:
         lines = [ln.strip() for ln in file.readlines()]
+
     reqs = []
     for ln in lines:
         # filer all comments
         if comment_char in ln:
             ln = ln[:ln.index(comment_char)].strip()
+
         # skip directly installed dependencies
         if ln.startswith('http'):
             continue
+
         if ln:  # if requirement is not empty
             reqs.append(ln)
+
     return reqs
 
 
-_PATH_ROOT = os.path.dirname(__file__)
+root_path = os.path.abspath(os.path.dirname(__file__))
+requirements_path = os.path.join(root_path, 'requirements')
 
 # Package meta-data.
 NAME = 'seagrass'
@@ -44,12 +51,12 @@ REQUIRES_PYTHON = '>=3.6.0, <3.8'
 VERSION = '0.1.0'
 
 # What packages are required for this module to be executed?
-REQUIRED = _load_requirements(_PATH_ROOT, "requirements.txt")
+REQUIRED = _load_requirements(requirements_path, "requirements.txt")
 
 # What packages are optional?
 EXTRAS = {
-    "modulos":  _load_requirements(_PATH_ROOT, "requirements-modulos.txt"),
-    "dev": _load_requirements(_PATH_ROOT, "requirements-dev.txt"),
+    "modulos": _load_requirements(requirements_path, "requirements-modulos.txt"),
+    "dev": _load_requirements(requirements_path, "requirements-dev.txt"),
 }
 
 # The rest you shouldn't have to touch too much :)
@@ -58,12 +65,10 @@ EXTRAS = {
 # If you do change the License, remember to change the Trove Classifier for
 # that!
 
-here = os.path.abspath(os.path.dirname(__file__))
-
 # Import the README and use it as the long-description.
 # Note: this will only work if 'README.md' is present in your MANIFEST.in file!
 try:
-    with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
+    with io.open(os.path.join(root_path, 'README.md'), encoding='utf-8') as f:
         long_description = '\n' + f.read()
 except FileNotFoundError:
     long_description = DESCRIPTION
@@ -72,7 +77,7 @@ except FileNotFoundError:
 about = {}
 if not VERSION:
     project_slug = NAME.lower().replace("-", "_").replace(" ", "_")
-    with open(os.path.join(here, project_slug, '__version__.py')) as f:
+    with open(os.path.join(root_path, project_slug, '__version__.py')) as f:
         exec(f.read(), about)
 else:
     about['__version__'] = VERSION
@@ -98,7 +103,7 @@ class UploadCommand(Command):
     def run(self):
         try:
             self.status('Removing previous builds…')
-            rmtree(os.path.join(here, 'dist'))
+            rmtree(os.path.join(root_path, 'dist'))
         except OSError:
             pass
 
