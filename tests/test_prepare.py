@@ -101,8 +101,6 @@ class TestPrepare(unittest.TestCase):
             )
         )
 
-        no_data_value = -9999
-
         expected_X = np.array(
             (
                 [1, 10],
@@ -134,7 +132,7 @@ class TestPrepare(unittest.TestCase):
         )
 
         X, y = prepare.create_training_data(
-            self.data, ground_truth, no_data_value
+            self.data, ground_truth
         )
 
         assert_array_equal(X, expected_X)
