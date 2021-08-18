@@ -36,7 +36,7 @@ def return_features(raster, bands=None, blurring=False):
 def create_training_data(
     raster,
     ground_truth_data,
-    no_data_value,
+    no_data_value=None,
     bands=None,
     blurring=False,
 ):
@@ -45,23 +45,22 @@ def create_training_data(
     Args:
         raster (np.ndarray): Input raster image.
         ground_truth_data (np.ndarray): Input ground truth raster.
-        no_data_value (int): Integer value representing pixels containing no
-            data.
+        no_data_value (int, optional): Integer value representing pixels
+        containing no data. Defaults to None.
         bands (list, optional): List of indices corresponding to the desired
-            raster bands. WARNING: If using the bands attr when creating a
-            Sentinel 2 mosaic, these indices may differ as order is reset when
-            creating a mosaic, e.g. [1,2,4,6] --> [0,1,2,3].
+            raster bands. Defaults to None. WARNING: If using the bands attr
+            when creating a Sentinel 2 mosaic, these indices may differ as
+            order is reset when creating a mosaic, e.g. [1,2,4,6] -->
+            [0,1,2,3].
 
     Returns:
         tuple: Tuple of numpy ndarrays with input features and ground truth
         values.
     """
 
-    # Find no_data values; mask is true where there is valid data
     mask = ground_truth_data != no_data_value
-    # Keep only values with ground truth data
+
     X = return_features(raster, bands, blurring)[mask.ravel()]
-    # Flip the ground truth to positive values - maybe should change this
-    y = abs(ground_truth_data)[mask].copy().reshape(-1, 1)
+    y = ground_truth_data[mask].reshape(-1, 1)
 
     return X, y
