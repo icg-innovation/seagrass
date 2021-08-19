@@ -10,60 +10,61 @@ from shutil import rmtree
 from geocube.api.core import make_geocube
 
 
-def save_training_data(filepath, X, y, filetype=None, **kwargs):
+def save_training_data(filepath, X, y, **kwargs):
     """Save training data for machine learning in desired format.
 
     Args:
         filepath (str): Filepath to save training data.
         X (numpy.ndarray): Training data features.
         y (numpy.ndarray): Machine learning target values.
-        filetype (str, optional): Desired file type. Accepted options are
-            currently `npy`, `csv` and `tar`.
     """
 
-    if filetype is None:
-        filetype = filepath.split('.')[-1]
+    filepath_extension = os.path.splitext(filepath)[-1]
 
-    if filetype == "npy":
-        save_ml_data_npy(filepath, [X, y], 'training')
+    if filepath_extension == ".npy":
+        save_ml_data_npy(filepath, [X, y], 'training', **kwargs)
 
-    elif filetype == "csv":
+    elif filepath_extension == ".csv":
         save_ml_data_csv(filepath, [X, y], 'training', **kwargs)
 
-    elif filetype == "tar":
+    elif filepath_extension == ".tar":
         save_ml_data_modulos(filepath, [X, y], 'training', **kwargs)
 
     else:
-        raise ValueError("Invalid filetype! Check your filepath.")
+        raise ValueError(
+            f"Filepath extension '{filepath_extension}' is invalid! Accepted "
+            "extensions are '.npy', '.csv' and '.tar'."
+        )
 
 
-def save_prediction_features(filepath, features, filetype=None, **kwargs):
+def save_prediction_features(filepath, features, **kwargs):
     """Save features for machine learning predictions in desired format.
+    Accepted filepath extensions are '.npy', '.csv' and '.tar'.
 
     Args:
         filepath (str): Filepath to save prediction data.
         prediction_features (numpy.ndarray): Features to be passed to the
             machine learning model for prediction.
-        filetype (str, optional): Desired file type. Accepted options are
-            currently `npy`, `csv` and `tar`.
     """
-    if filetype is None:
-        filetype = filepath.split('.')[-1]
+    filepath_extension = os.path.splitext(filepath)[-1]
 
-    if filetype == "npy":
-        save_ml_data_npy(filepath, features, 'prediction')
+    if filepath_extension == ".npy":
+        save_ml_data_npy(filepath, features, 'prediction', **kwargs)
 
-    elif filetype == "csv":
+    elif filepath_extension == ".csv":
         save_ml_data_csv(filepath, features, 'prediction', **kwargs)
 
-    elif filetype == "tar":
+    elif filepath_extension == ".tar":
         save_ml_data_modulos(filepath, features, 'prediction', **kwargs)
 
     else:
-        raise ValueError("Invalid filetype! Check your filepath.")
+        raise ValueError(
+            f"Filepath extension '{filepath_extension}' is invalid! Accepted "
+            "extensions are '.npy', '.csv' and '.tar'."
+        )
 
 
-def save_ml_data_npy(filepath, data, data_purpose):
+def save_ml_data_npy(filepath, data, data_purpose, **kwargs):
     """Save machine learning data in npy format.
 
     Args:
@@ -81,16 +82,16 @@ def save_ml_data_npy(filepath, data, data_purpose):
             "Accepted values are 'training' and 'prediction'."
         )
 
-    filepath_extension = filepath.split(".")[-1]
-    if filepath_extension != "npy":
+    filepath_extension = os.path.splitext(filepath)[-1]
+    if filepath_extension != ".npy":
         raise ValueError(
-            f"Extension .{filepath_extension} is not valid for "
+            f"Extension {filepath_extension} is not valid for "
             "the specified filetype! Check the input filepath."
         )
     if data_purpose == "training":
         data = np.hstack(data)
 
-    np.save(filepath, data)
+    np.save(filepath, data, **kwargs)
 
 
 def save_ml_data_csv(filepath, data, data_purpose, **kwargs):
@@ -111,10 +112,10 @@ def save_ml_data_csv(filepath, data, data_purpose, **kwargs):
             "Accepted values are 'training' and 'prediction'."
         )
 
-    filepath_extension = filepath.split(".")[-1]
-    if filepath_extension != "csv":
+    filepath_extension = os.path.splitext(filepath)[-1]
+    if filepath_extension != ".csv":
         raise ValueError(
-            f"Extension .{filepath_extension} is not valid for "
+            f"Extension {filepath_extension} is not valid for "
             "the specified filetype! Check the input filepath."
         )
 
@@ -128,7 +129,7 @@ def save_ml_data_csv(filepath, data, data_purpose, **kwargs):
 
 
 def save_ml_data_modulos(
-    tar_filepath,
+    filepath,
     data,
     data_purpose,
     delete_tmp=True,
@@ -139,7 +140,7 @@ def save_ml_data_modulos(
     training or predictions.
 
     Args:
-        tar_filepath (str): Filepath to save tar file.
+        filepath (str): Filepath to save tar file.
         data (numpy.ndarray or tuple or list): Input data for the machine
             learning model. Can be a single numpy array containing features for
             predictions, or a tuple/list containing both features and target
@@ -157,19 +158,27 @@ def save_ml_data_modulos(
             "Accepted values are 'training' and 'prediction'."
         )
 
-    directory = os.path.dirname(tar_filepath)
+    filepath_extension = os.path.splitext(filepath)[-1]
+    if filepath_extension != ".tar":
+        raise ValueError(
+            f"Extension {filepath_extension} is not valid for "
+            "the specified filetype! Check the input filepath."
+        )
+
+    directory = os.path.dirname(filepath)
     tmp_dir = _make_tmp_dir(directory)
 
-    csv_filename = f"{os.path.basename(tar_filepath).split('.')[0]}.csv"
+    file_basename = os.path.basename(filepath)
+    csv_filename = f"{os.path.splitext(file_basename)[0]}.csv"
     csv_filepath = f"{tmp_dir}/{csv_filename}"
 
     json_filename = "dataset_structure.json"
-    json_filepath = f"{tmp_dir}/data_structure.json"
+    json_filepath = f"{tmp_dir}/{json_filename}"
 
     save_ml_data_csv(csv_filepath, data, data_purpose, **kwargs)
     _make_data_structure_json(csv_filename, json_filepath)
 
-    with tarfile.open(tar_filepath, "w") as tar:
+    with tarfile.open(filepath, "w") as tar:
         tar.add(csv_filepath, arcname=csv_filename)
         tar.add(json_filepath, arcname=json_filename)
 
@@ -189,7 +198,7 @@ def _make_data_structure_json(csv_filename, json_filepath):
     structure_dict = {
         "type": "table",
         "path": csv_filename,
-        "name": csv_filename.split('.')[0],
+        "name": os.path.splitext(csv_filename)[0],
     }
     version_dict = {"_version": "0.2"}
     data_structure = [structure_dict, version_dict]
@@ -219,27 +228,28 @@ def _make_tmp_dir(directory):
     return tmp_dir
 
 
-def extract_training_data(filepath, filetype=None):
+def extract_training_data(filepath):
     """Extract training data from file.
 
     Args:
         filepath (str): Filepath to the training data.
-        filetype (str, optional): Filetype of the training data.
 
     Returns:
         tuple: Tuple containing training data features and target values for
         machine learning.
     """
 
-    if filetype is None:
-        filetype = filepath.split('.')[-1]
+    filepath_extension = os.path.splitext(filepath)[-1]
 
-    if filetype == "npy":
+    if filepath_extension == ".npy":
         X, y = extract_training_data_npy(filepath)
-    elif filetype == "csv":
+    elif filepath_extension == ".csv":
         X, y = extract_training_data_csv(filepath)
     else:
-        raise ValueError("Invalid filetype! Check your filepath.")
+        raise ValueError(
+            f"Filepath extension '{filepath_extension}' is invalid! Accepted "
+            "extensions are '.npy' and '.csv'"
+        )
 
     return X, y
 
@@ -281,10 +291,10 @@ def extract_training_data_csv(filepath):
 
 def make_json(
     output_filepath,
-    sentinel2_filepath,
+    raster_filepath,
     ground_truth_filepath,
-    sentinel2_bands=None,
-    sentinel2_scale=10000,
+    raster_bands=None,
+    raster_scale=1,
     ground_truth_nodata=None,
     ground_truth_nodata_threshold=None,
 ):
@@ -292,15 +302,14 @@ def make_json(
 
     Args:
         output_filepath (str): Filepath for output json.
-        sentinel2_filepath (str): Filepath to the Sentinel 2 raster
-            file.
+        raster_filepath (str): Filepath to the raster image.
         ground_truth_filepath (str): Filepath to the ground truth raster
             file.
-        sentinel2_bands (list, optional): List of integers corresponding to
-            the desired Sentinel 2 bands. WARNING: There is an issue when
+        raster_bands (list, optional): List of integers corresponding to
+            the desired raster bands. WARNING: There is an issue when
             specifying more than four bands.
-        sentinel2_scale (int, optional): Scale factor to obtain the true
-            Sentinel 2 pixel value. Defaults to 10000.
+        raster_scale (int, optional): Scale factor to obtain the true
+            raster pixel value. Defaults to 1.
         ground_truth_nodata (int, optional): Integer value representing pixels
             containing no data.
         ground_truth_nodata_threshold (float, optional): Determines threshold
@@ -308,10 +317,10 @@ def make_json(
             will be set equal to ground_truth_nodata instead.
     """
     output_dict = {
-        "sentinel2_filepath": sentinel2_filepath,
+        "raster_filepath": raster_filepath,
         "ground_truth_filepath": ground_truth_filepath,
-        "sentinel2_bands": sentinel2_bands,
-        "sentinel2_scale": sentinel2_scale,
+        "raster_bands": raster_bands,
+        "raster_scale": raster_scale,
         "ground_truth_nodata": ground_truth_nodata,
         "ground_truth_nodata_threshold": ground_truth_nodata_threshold,
     }
@@ -327,7 +336,8 @@ def shape_to_binary_raster(shp_filepath, out_dir):
         shp_filepath (str): Filepath to the shapefile.
         out_dir (str): Output directory to store the binary raster.
     """
-    filename = os.path.basename(shp_filepath).split(".")[0]
+    shp_basename = os.path.basename(shp_filepath)
+    filename = os.path.splitext(shp_basename)[0]
 
     geo_df = gpd.read_file(shp_filepath)
     geo_df["data"] = 1   # Data to fill pixel values with.
