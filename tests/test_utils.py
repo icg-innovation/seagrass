@@ -761,15 +761,14 @@ class TestUtils(unittest.TestCase):
         mock_geocube = mock_make_geocube.return_value
 
         utils.shape_to_binary_raster(test_shp_filepath, test_out_dir)
-        print(mock_geocube.mock_calls)
 
         mock_gpd.read_file.assert_called_once_with(test_shp_filepath)
+        mock_geo_df.__setitem__.assert_called_once_with('data', 1)
         mock_make_geocube.assert_called_once_with(
             vector_data=mock_geo_df,
             measurements=["data"],
             resolution=(-10, 10),
             fill=0,
         )
-
         mock_geocube.__getitem__.assert_called_once_with('data')
         mock_geocube.__getitem__.return_value.rio.to_raster.assert_called_once_with("path/to/out/dir/shp.tif")  # noqa: E501
