@@ -18,22 +18,22 @@ from setuptools import find_packages, setup, Command
 
 def _load_requirements(path_dir, file_name='requirements.txt', comment_char='#'):
     with open(os.path.join(path_dir, file_name), 'r') as file:
-        lines = [ln.strip() for ln in file.readlines()]
+        lines = [line.strip() for line in file.readlines()]
 
-    reqs = []
-    for ln in lines:
+    requirements = []
+    for line in lines:
         # filer all comments
-        if comment_char in ln:
-            ln = ln[:ln.index(comment_char)].strip()
+        if comment_char in line:
+            line = line[:line.index(comment_char)].strip()
 
         # skip directly installed dependencies
-        if ln.startswith('http'):
+        if line.startswith('http'):
             continue
 
-        if ln:  # if requirement is not empty
-            reqs.append(ln)
+        if line:  # if requirement is not empty
+            requirements.append(line)
 
-    return reqs
+    return requirements
 
 
 def _find_optional_installs(requirements_dir):
@@ -43,7 +43,7 @@ def _find_optional_installs(requirements_dir):
     optional_dict = {}
     for requirements_filepath in requirements_list:
         filename = os.path.basename(requirements_filepath)
-        optional_name = re.search("\-(.*?)\.", filename).group(1)
+        optional_name = re.search("requirements\-(\S*?)\.txt", filename).group(1)
 
         optional_dict[optional_name] = _load_requirements(requirements_dir, filename)
 
@@ -59,7 +59,7 @@ URL = 'https://github.com/Max-FM/seagrass'
 EMAIL = 'max.foxley-marrable@port.ac.uk'
 AUTHOR = 'Max Foxley-Marrable, Andrew Lundgren'
 REQUIRES_PYTHON = '>=3.6.0, <3.8'
-VERSION = '0.1.0'
+VERSION = '0.0.1'
 
 # What packages are required for this module to be executed?
 REQUIRED = _load_requirements(requirements_dir, "requirements.txt")
@@ -162,6 +162,7 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy'
     ],
