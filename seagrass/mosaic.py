@@ -7,7 +7,7 @@ from geopandas import GeoSeries
 from shapely.geometry import box
 
 
-def create_s2_mosaic(
+def create_raster_mosaic(
     s2_file_list,
     ground_truth_filepath,
     bands=None,
@@ -57,7 +57,7 @@ def create_s2_mosaic(
     return mosaic, transform
 
 
-def return_s2_mosaic_projected_ground_truth(
+def return_mosaic_projected_ground_truth(
     ground_truth_filepath,
     s2_transform,
     s2_shape,
