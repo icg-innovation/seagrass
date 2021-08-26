@@ -26,10 +26,10 @@ The documentation pages can then be found under `docs/build/html`.
 If importing data using the `seagrass.raster.open_from_json` method, the input json file needs to abide by the following example structure:
 ```
 {
-    "sentinel2_filepath": "path/to/s2/data", OR ["path/to/s2/data_1", "path/to/s2/data_2", etc],
+    "raster_filepath": "path/to/s2/data", OR ["path/to/s2/data_1", "path/to/s2/data_2", etc],
     "ground_truth_filepath": "path/to/ground/truth/data",
-    "sentinel2_bands": [1, 2, 3, 4, etc],
-    "sentinel2_scale": 10000,
+    "raster_bands": [1, 2, 3, 4, etc],
+    "raster_scale": 10000,
     "ground_truth_nodata": -9999,
     "ground_truth_nodata_threshold": -1e6
 }
@@ -37,9 +37,9 @@ If importing data using the `seagrass.raster.open_from_json` method, the input j
 
 Currently accepted arguments are:
 
-- `sentinel2_filepath` (str or list, required): Sentinel 2 geoTIFF filepath OR list of Sentinel 2 geoTIFF filepaths if creating a mosaic.
+- `raster_filepath` (str or list, required): Satellite image geoTIFF filepath OR list of satellite image geoTIFF filepaths if creating a mosaic.
 - `ground_truth_filepath` (str, required): Ground truth geoTIFF filepath.
-- `sentinel2_bands` (list, optional): List of integers corresponding to the desired Sentinel 2 bands to consider when importing. If not included then all bands are considered.
-- `sentinel2_scale` (int, optional): Value to divide the Sentinel 2 pixels by to obtain the true pixel values. Defaults to 10000 if not included.
+- `raster_bands` (list, optional): List of integers corresponding to the desired satellite image bands to consider when importing. If not included then all bands are considered.
+- `raster_scale` (int, optional): Value to divide the satellite image pixels by to obtain the true pixel values. Defaults to 10000 if not included.
 - `ground_truth_nodata` (int, optional): Integer value representing pixels containing no data. Defaults to None if not included.
 - `ground_truth_nodata_threshold` (int or float, optional): Pixels with values less than the threshold will instead be set equal to `ground_truth_nodata`. Defaults to None if not included.
