@@ -8,14 +8,14 @@ from seagrass.mosaic import (
 
 
 def open_from_json(json_filepath):
-    """Opens Sentinel 2 and ground truth rasters from json file.
+    """Opens satellite image and ground truth rasters from json file.
 
     Args:
         json_filepath (str): Filepath to json file containing image filepaths
             and relevant information.
 
     Returns:
-        tuple: Tuple of numpy.ndarrays containing a Sentinel 2 raster
+        tuple: Tuple of numpy.ndarrays containing a satellite image raster
         (or mosaic) and a ground truth raster.
     """
     with open(json_filepath) as f:
@@ -62,19 +62,19 @@ def open_and_match_rasters_mosaic(
     ground_truth_nodata=None,
     ground_truth_nodata_threshold=None
 ):
-    """Opens and returns a Sentinel 2 mosaic and a ground truth raster with matched
-    projections.
+    """Opens and returns a satellite image mosaic and a ground truth raster
+    with matched projections.
 
     Args:
         raster_filepath_list (str): List of filepaths pointing towards
-            Sentinel 2 raster files to be merged into a single mosaic.
+            satellite image raster files to be merged into a single mosaic.
         ground_truth_filepath (str): Filepath to the ground truth raster
             file.
         raster_bands (list, optional): List of integers corresponding to
-            the desired Sentinel 2 bands. WARNING: There is an issue when
+            the desired satellite image bands. WARNING: There is an issue when
             specifying more than four bands.
         raster_scale (int, optional): Scale factor to obtain the true
-            Sentinel 2 pixel value. Defaults to 10000.
+            satellite image pixel value. Defaults to 10000.
         ground_truth_nodata (int, optional): Integer value representing pixels
             containing no data.
         ground_truth_nodata_threshold (float, optional): Determines threshold
@@ -82,8 +82,8 @@ def open_and_match_rasters_mosaic(
             will be set equal to ground_truth_nodata instead.
 
     Returns:
-        tuple: Tuple of numpy.ndarrays containing a Sentinel 2 mosaic raster
-        and a ground truth raster.
+        tuple: Tuple of numpy.ndarrays containing a satellite image mosaic
+        raster and a ground truth raster.
     """
     raster_mosaic, raster_transform = create_raster_mosaic(
         raster_filepath_list,
@@ -104,17 +104,17 @@ def open_and_match_rasters_mosaic(
 
 
 def open_raster_image(raster_filepath, raster_scale=1):
-    """Opens and returns the specified Sentinel 2 image, scaled to the true
+    """Opens and returns the specified satellite image image, scaled to the true
     pixel value.
 
     Args:
-        raster_filepath (str): Filepath to the Sentinel 2 raster
+        raster_filepath (str): Filepath to the satellite image raster
             file.
         raster_scale (int, optional): Scale factor to obtain the true
-            Sentinel 2 pixel value. Defaults to 10000.
+            satellite image pixel value. Defaults to 10000.
 
     Returns:
-        xarray.DataArray: Sentinel 2 raster.
+        xarray.DataArray: Satellite image raster.
     """
     raster = rioxarray.open_rasterio(raster_filepath)
     raster = raster / raster_scale
@@ -127,17 +127,17 @@ def open_and_match_rasters(
     ground_truth_filepath,
     raster_scale=1
 ):
-    """Opens and returns Sentinel 2 and ground truth rasters with matched
+    """Opens and returns satellite image and ground truth rasters with matched
     projections.
 
     Args:
-        raster_filepath (str): Filepath to the Sentinel 2 raster
+        raster_filepath (str): Filepath to the satellite image raster
             file.
         ground_truth_filepath (str): Filepath to the ground truth raster
             file.
 
     Returns:
-        tuple: Tuple of xarray.DataArrays containing a Sentinel 2 raster
+        tuple: Tuple of xarray.DataArrays containing a satellite image raster
         and a ground truth raster.
     """
     raster = open_raster_image(raster_filepath, raster_scale)
