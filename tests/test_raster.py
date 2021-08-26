@@ -29,7 +29,12 @@ class TestRaster(unittest.TestCase):
             "ground_truth_nodata_threshold": -1e6
         }
 
-        mock_open_and_match_rasters.return_value = (Mock(), Mock())
+        mock_raster = Mock()
+        mock_ground_truth = Mock()
+
+        mock_open_and_match_rasters.return_value = (
+            mock_raster, mock_ground_truth
+        )
 
         raster_image, ground_truth = raster.open_from_json(test_json_filepath)
 
@@ -46,6 +51,9 @@ class TestRaster(unittest.TestCase):
         mock_open.return_value.__exit__.assert_called_once_with(
             None, None, None
         )
+
+        self.assertEqual(raster_image, mock_raster)
+        self.assertEqual(ground_truth, mock_ground_truth)
 
     @patch("seagrass.raster.open_and_match_rasters_mosaic")
     @patch("seagrass.raster.json")
@@ -152,12 +160,14 @@ class TestRaster(unittest.TestCase):
 
         mock_raster_mosaic = Mock()
         mock_raster_transform = Mock()
+        mock_ground_truth = Mock()
+
         mock_create_raster_mosaic.return_value = (
             mock_raster_mosaic, mock_raster_transform
         )
-        mock_return_mosaic_projected_ground_truth.return_value = Mock()
+        mock_return_mosaic_projected_ground_truth.return_value = mock_ground_truth  # noqa: E501
 
-        raster.open_and_match_rasters_mosaic(
+        mosaic, ground_truth = raster.open_and_match_rasters_mosaic(
             test_raster_filepath_list,
             test_ground_truth_filepath,
             test_raster_bands,
@@ -180,6 +190,9 @@ class TestRaster(unittest.TestCase):
             test_ground_truth_nodata,
             test_ground_truth_nodata_threshold
         )
+
+        self.assertEqual(mosaic, mock_raster_mosaic)
+        self.assertEqual(ground_truth, mock_ground_truth)
 
     @patch("seagrass.raster.rioxarray")
     def test_open_raster_image(self, mock_rioxarray):
@@ -214,8 +227,9 @@ class TestRaster(unittest.TestCase):
 
         mock_raster = mock_open_raster_image.return_value
         mock_ground_truth = mock_rioxarray.open_rasterio.return_value
+        mock_reprojected_ground_truth = mock_ground_truth.rio.reproject_match.return_value  # noqa: E501
 
-        raster.open_and_match_rasters(
+        raster_image, ground_truth = raster.open_and_match_rasters(
             test_raster_filepath,
             test_ground_truth_filepath,
             test_raster_scale
@@ -231,3 +245,6 @@ class TestRaster(unittest.TestCase):
         mock_ground_truth.rio.reproject_match.assert_called_once_with(
             mock_raster
         )
+
+        self.assertEqual(raster_image, mock_raster)
+        self.assertEqual(ground_truth, mock_reprojected_ground_truth)
