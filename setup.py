@@ -53,8 +53,8 @@ root_path = os.path.abspath(os.path.dirname(__file__))
 requirements_dir = os.path.join(root_path, 'requirements')
 
 # Package meta-data.
-NAME = 'seagrass'
-DESCRIPTION = 'A companion module for the UoP SDB seagrass project.'
+NAME = 'uop-seagrass'
+DESCRIPTION = 'A companion Python module for the UoP SDB seagrass project.'
 URL = 'https://github.com/Max-FM/seagrass'
 EMAIL = 'max.foxley-marrable@port.ac.uk'
 AUTHOR = 'Max Foxley-Marrable, Andrew Lundgren'
@@ -93,9 +93,9 @@ else:
 
 
 class UploadCommand(Command):
-    """Support setup.py upload."""
+    """Support setup.py upload to PyPI."""
 
-    description = 'Build and publish the package.'
+    description = 'Build and publish the package to PyPI.'
     user_options = []
 
     @staticmethod
@@ -131,6 +131,34 @@ class UploadCommand(Command):
         sys.exit()
 
 
+class TestUploadCommand(UploadCommand):
+    """Support setup.py upload to TestPyPI."""
+
+    description = 'Build and publish the package to TestPyPI.'
+    user_options = []
+
+    def run(self):
+        try:
+            self.status('Removing previous builds…')
+            rmtree(os.path.join(root_path, 'dist'))
+        except OSError:
+            pass
+
+        self.status('Building Source and Wheel (universal) distribution…')
+        os.system(
+            '{0} setup.py sdist bdist_wheel --universal'.format(sys.executable)
+        )
+
+        self.status('Uploading the package to TestPyPI via Twine…')
+        os.system('twine upload --repository testpypi dist/*')
+
+        self.status('Pushing git tags…')
+        os.system('git tag v{0}'.format(about['__version__']))
+        os.system('git push --tags')
+
+        sys.exit()
+
+
 # Where the magic happens:
 setup(
     name=NAME,
@@ -158,7 +186,6 @@ setup(
     classifiers=[
         # Trove classifiers
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
-        'License :: OSI Approved :: No License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
@@ -169,5 +196,6 @@ setup(
     # $ setup.py publish support.
     cmdclass={
         'upload': UploadCommand,
+        'test-upload': TestUploadCommand
     },
 )
