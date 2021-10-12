@@ -3,7 +3,7 @@ geocube==0.0.17
 geopandas==0.9.0
 numpy~=1.19
 pandas~=1.1
-rasterio==1.2.6
+rasterio==1.2.10
 rioxarray==0.7.0
 scipy~=1.4
 shapely==1.7.1
