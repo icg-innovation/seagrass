@@ -4,7 +4,7 @@ A companion Python module (including Colab notebooks) for the University of Port
 
 This package is still in development and is *highly* experimental, therefore the API is subject to frequent and significant change. Use with caution.
 
-NOTE: This package currently holds no license and therefore cannot be copied, distributed, modified, or used research outside the University of Portsmouth without express permission from the authors.
+NOTE: This package currently holds no license and therefore cannot be copied, distributed, modified, or used for research outside the University of Portsmouth without express permission from the authors.
 
 ## Installation
 To install the `seagrass` Python package, run the following command from your `bash` terminal:
